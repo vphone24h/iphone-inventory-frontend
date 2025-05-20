@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; // Thêm dòng này để dùng <Link>
+import { Link } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -9,7 +9,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:4000/api/admin-login", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -56,14 +56,18 @@ function Login() {
         </button>
       </form>
 
-      {/* Liên kết chuyển trang */}
       <div className="mt-4 text-sm text-gray-600">
         <p>
-          ❓ <Link to="/quen-mat-khau" className="text-blue-500 hover:underline">Quên mật khẩu?</Link>
+          ❓{" "}
+          <Link to="/quen-mat-khau" className="text-blue-500 hover:underline">
+            Quên mật khẩu?
+          </Link>
         </p>
         <p className="mt-2">
           🚀 Chưa có tài khoản?{" "}
-          <Link to="/dang-ky" className="text-green-600 hover:underline">Đăng ký ngay</Link>
+          <Link to="/dang-ky" className="text-green-600 hover:underline">
+            Đăng ký ngay
+          </Link>
         </p>
       </div>
     </div>
