@@ -1,12 +1,14 @@
-import DangKy from './pages/DangKy';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./Login";
 
 function App() {
   return (
-    <div>
-      <DangKy />
-    </div>
+    <Router basename="/">
+      <Routes>
+        <Route path="/" element={<Login />} />
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
-
