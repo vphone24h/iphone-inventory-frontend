@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ChiTietDonHang from "./ChiTietDonHang";
+import LogoutButton from "../components/LogoutButton"; // ✅ Thêm dòng này
 
 function BaoCao() {
   const [data, setData] = useState(null);
@@ -52,7 +53,12 @@ function BaoCao() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
+    <div className="max-w-5xl mx-auto p-4 relative">
+      {/* ✅ Nút đăng xuất ở góc phải */}
+      <div className="absolute top-4 right-4">
+        <LogoutButton />
+      </div>
+
       <h2 className="text-2xl font-bold mb-4">📊 Báo cáo lợi nhuận</h2>
 
       {/* Bộ lọc */}

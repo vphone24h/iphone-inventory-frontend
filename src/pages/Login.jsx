@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,9 +17,11 @@ function Login() {
       });
 
       const data = await res.json();
+
       if (res.ok) {
         alert("✅ Đăng nhập thành công");
-        // TODO: lưu token vào localStorage và chuyển trang nếu cần
+        localStorage.setItem("token", data.token); // ✔️ lưu token
+        navigate("/nhap-hang"); // ✔️ chuyển trang
       } else {
         alert(`❌ ${data.message}`);
       }
@@ -75,4 +78,3 @@ function Login() {
 }
 
 export default Login;
-

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton"; // ✅ Bổ sung import
 
 function TonKhoSoLuong() {
   const [data, setData] = useState([]);
@@ -85,7 +86,12 @@ function TonKhoSoLuong() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 bg-white shadow rounded-xl p-6">
+    <div className="max-w-6xl mx-auto mt-10 bg-white shadow rounded-xl p-6 relative">
+      {/* ✅ Nút đăng xuất góc phải */}
+      <div className="absolute top-4 right-4">
+        <LogoutButton />
+      </div>
+
       <h2 className="text-2xl font-bold text-center text-green-600 mb-6">
         📦 Tồn kho theo số lượng
       </h2>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LogoutButton from "../components/LogoutButton"; // nhớ tạo file này đúng như hướng dẫn
 
 function NhapHang() {
   const [formData, setFormData] = useState({
@@ -31,7 +32,7 @@ function NhapHang() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          tenSanPham: formData.product_name || formData.tenSanPham, // gán giá trị cho backend
+          tenSanPham: formData.product_name || formData.tenSanPham,
         }),
       });
 
@@ -60,8 +61,15 @@ function NhapHang() {
   const inputClass = "w-full border p-2 rounded h-10";
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
+    <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
+      <div className="absolute top-4 right-4">
+        <LogoutButton />
+      </div>
+
+      <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
+        Nhập hàng iPhone
+      </h2>
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         <input
           type="text"
