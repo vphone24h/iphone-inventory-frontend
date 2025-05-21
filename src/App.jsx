@@ -6,25 +6,25 @@ import ResetMatKhau from "./pages/ResetMatKhau";
 import NhapHang from "./pages/NhapHang";
 import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
-import BaoCao from "./BaoCao"; // Báo cáo nằm ngoài /pages
-import PrivateRoute from "./components/PrivateRoute"; // ⚠️ Nếu có dùng bảo vệ route
+import BaoCao from "./BaoCao"; // nằm ngoài /pages
+import PrivateRoute from "./components/PrivateRoute"; // dùng để bảo vệ route
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Công khai */}
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dang-ky" element={<DangKy />} />
         <Route path="/quen-mat-khau" element={<QuenMatKhau />} />
         <Route path="/reset-mat-khau/:token" element={<ResetMatKhau />} />
 
-        {/* Cần đăng nhập */}
-        <Route path="/nhap-hang" element={<NhapHang />} />
-        <Route path="/xuat-hang" element={<XuatHang />} />
-        <Route path="/ton-kho" element={<TonKhoSoLuong />} />
-        <Route path="/bao-cao" element={<BaoCao />} />
+        {/* Private routes */}
+        <Route path="/nhap-hang" element={<PrivateRoute><NhapHang /></PrivateRoute>} />
+        <Route path="/xuat-hang" element={<PrivateRoute><XuatHang /></PrivateRoute>} />
+        <Route path="/ton-kho" element={<PrivateRoute><TonKhoSoLuong /></PrivateRoute>} />
+        <Route path="/bao-cao" element={<PrivateRoute><BaoCao /></PrivateRoute>} />
       </Routes>
     </Router>
   );
