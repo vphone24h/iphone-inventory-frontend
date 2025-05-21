@@ -16,8 +16,8 @@ function DangKy() {
     }
 
     try {
-      const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, ""); // Xoá dấu / cuối nếu có
-      console.log("✅ API URL:", API);
+      const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, ""); // Xoá dấu / nếu có
+      console.log("🔗 API:", `${API}/api/admin-register`);
 
       const res = await fetch(`${API}/api/admin-register`, {
         method: "POST",
@@ -25,15 +25,22 @@ function DangKy() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      // Nếu không phải JSON, sẽ tránh lỗi "unexpected token <"
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error("❌ Phản hồi không phải JSON:", err);
+      }
+
       if (res.ok) {
         alert("✅ Đăng ký thành công!");
         navigate("/login");
       } else {
-        alert(`❌ ${data.message}`);
+        alert(`❌ ${data.message || "Đăng ký thất bại"}`);
       }
     } catch (err) {
-      console.error("❌ Lỗi kết nối:", err);
+      console.error("❌ Lỗi kết nối server:", err);
       alert("❌ Lỗi khi kết nối tới server");
     }
   };
