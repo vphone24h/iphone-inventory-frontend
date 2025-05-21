@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ChiTietDonHang from "./ChiTietDonHang";
-import LogoutButton from "../components/LogoutButton"; // ✅ Thêm dòng này
+import LogoutButton from "../components/LogoutButton";
 
 function BaoCao() {
   const [data, setData] = useState(null);
