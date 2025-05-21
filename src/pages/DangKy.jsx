@@ -16,7 +16,10 @@ function DangKy() {
     }
 
     try {
-      const res = await fetch("http://localhost:4000/api/admin-register", {
+      const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, ""); // Xoá dấu / cuối nếu có
+      console.log("✅ API URL:", API);
+
+      const res = await fetch(`${API}/api/admin-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -25,11 +28,12 @@ function DangKy() {
       const data = await res.json();
       if (res.ok) {
         alert("✅ Đăng ký thành công!");
-        navigate("/login"); // Chuyển về trang đăng nhập
+        navigate("/login");
       } else {
         alert(`❌ ${data.message}`);
       }
     } catch (err) {
+      console.error("❌ Lỗi kết nối:", err);
       alert("❌ Lỗi khi kết nối tới server");
     }
   };
@@ -71,7 +75,6 @@ function DangKy() {
         </button>
       </form>
 
-      {/* Liên kết trở lại trang đăng nhập */}
       <p className="mt-4 text-sm text-gray-600">
         🔐 Đã có tài khoản?{" "}
         <button

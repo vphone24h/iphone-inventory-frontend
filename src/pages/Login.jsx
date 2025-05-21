@@ -9,8 +9,15 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    if (!apiUrl) {
+      alert("❌ Thiếu cấu hình biến môi trường VITE_API_URL");
+      return;
+    }
+
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin-login`, {
+      const res = await fetch(`${apiUrl}/api/admin-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -20,12 +27,13 @@ function Login() {
 
       if (res.ok) {
         alert("✅ Đăng nhập thành công");
-        localStorage.setItem("token", data.token); // ✔️ lưu token
-        navigate("/nhap-hang"); // ✔️ chuyển trang
+        localStorage.setItem("token", data.token);
+        navigate("/nhap-hang");
       } else {
         alert(`❌ ${data.message}`);
       }
     } catch (err) {
+      console.error("Lỗi kết nối:", err);
       alert("❌ Không thể kết nối tới server");
     }
   };

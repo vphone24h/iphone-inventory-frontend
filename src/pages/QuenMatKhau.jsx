@@ -1,32 +1,55 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
-function QuenMatKhau() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+function ResetMatKhau() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const handleReset = async (e) => {
+  const email = searchParams.get("email") || "";
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      setMessage("❌ Thiếu cấu hình VITE_API_URL trong .env");
+      return;
+    }
+
+    if (!email) {
+      setMessage("❌ Thiếu email trên đường dẫn.");
+      return;
+    }
+
+    if (password !== confirm) {
+      setMessage("❌ Mật khẩu xác nhận không khớp.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reset-password`, {
+      const res = await fetch(`${apiUrl}/api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
+
       if (res.ok) {
-        setMessage("✅ Đã gửi email khôi phục mật khẩu! Vui lòng kiểm tra hộp thư.");
+        setMessage("✅ Đặt lại mật khẩu thành công!");
+        setTimeout(() => navigate("/login"), 2000); // chuyển về trang đăng nhập sau 2s
       } else {
-        setMessage(`❌ ${data.message || "Gửi email thất bại."}`);
+        setMessage(`❌ ${data.message || "Lỗi không xác định."}`);
       }
     } catch (err) {
-      setMessage("❌ Lỗi kết nối tới server.");
+      console.error("❌ Lỗi kết nối:", err);
+      setMessage("❌ Không thể kết nối tới server.");
     } finally {
       setLoading(false);
     }
@@ -34,25 +57,37 @@ function QuenMatKhau() {
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 shadow rounded bg-white text-center">
-      <h1 className="text-2xl font-bold mb-4">🔁 Quên mật khẩu</h1>
+      <h1 className="text-2xl font-bold mb-4">🔐 Đặt lại mật khẩu</h1>
+      <p className="mb-4 text-gray-600 text-sm">
+        Email: <strong>{email}</strong>
+      </p>
 
-      <form onSubmit={handleReset} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
-          type="email"
-          placeholder="Nhập email đã đăng ký"
+          type="password"
+          placeholder="Mật khẩu mới"
           className="border p-2 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
+        <input
+          type="password"
+          placeholder="Xác nhận mật khẩu"
+          className="border p-2 rounded"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          required
+        />
+
         <button
           type="submit"
           disabled={loading}
           className={`py-2 rounded text-white ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
           }`}
         >
-          {loading ? "Đang gửi..." : "Gửi yêu cầu"}
+          {loading ? "Đang xử lý..." : "Xác nhận"}
         </button>
       </form>
 
@@ -65,17 +100,8 @@ function QuenMatKhau() {
           {message}
         </p>
       )}
-
-      <div className="mt-4 text-sm text-gray-600">
-        <a
-          onClick={() => navigate("/dang-nhap")}
-          className="text-blue-600 hover:underline cursor-pointer"
-        >
-          🔙 Quay lại đăng nhập
-        </a>
-      </div>
     </div>
   );
 }
 
-export default QuenMatKhau;
+export default ResetMatKhau;
