@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login"; // ✅ sửa lại đúng thư mục
+import Login from "./pages/Login";
 
 function App() {
   return (
