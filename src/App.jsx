@@ -6,7 +6,7 @@ import ResetMatKhau from "./pages/ResetMatKhau";
 import NhapHang from "./pages/NhapHang";
 import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
-import BaoCao from "./BaoCao"; // ✅ Sửa lại đúng vị trí thực tế
+import BaoCao from "./BaoCao"; // ❗️Đúng đường dẫn vì BaoCao.jsx nằm ở src/
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -21,38 +21,10 @@ function App() {
         <Route path="/reset-mat-khau/:token" element={<ResetMatKhau />} />
 
         {/* Private routes */}
-        <Route
-          path="/nhap-hang"
-          element={
-            <PrivateRoute>
-              <NhapHang />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/xuat-hang"
-          element={
-            <PrivateRoute>
-              <XuatHang />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/ton-kho-so-luong"
-          element={
-            <PrivateRoute>
-              <TonKhoSoLuong />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/bao-cao"
-          element={
-            <PrivateRoute>
-              <BaoCao />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/nhap-hang" element={<PrivateRoute><NhapHang /></PrivateRoute>} />
+        <Route path="/xuat-hang" element={<PrivateRoute><XuatHang /></PrivateRoute>} />
+        <Route path="/ton-kho-so-luong" element={<PrivateRoute><TonKhoSoLuong /></PrivateRoute>} />
+        <Route path="/bao-cao" element={<PrivateRoute><BaoCao /></PrivateRoute>} />
       </Routes>
     </Router>
   );
