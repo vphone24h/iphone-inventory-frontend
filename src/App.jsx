@@ -6,8 +6,8 @@ import ResetMatKhau from "./pages/ResetMatKhau";
 import NhapHang from "./pages/NhapHang";
 import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
-import BaoCao from "./pages/BaoCao"; // nên nằm trong /pages cho đồng nhất
-import PrivateRoute from "./components/PrivateRoute";
+import BaoCao from "./BaoCao"; // nằm ngoài /pages
+import PrivateRoute from "./components/PrivateRoute"; // dùng để bảo vệ route
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
         {/* Private routes */}
         <Route path="/nhap-hang" element={<PrivateRoute><NhapHang /></PrivateRoute>} />
         <Route path="/xuat-hang" element={<PrivateRoute><XuatHang /></PrivateRoute>} />
-        <Route path="/ton-kho-so-luong" element={<PrivateRoute><TonKhoSoLuong /></PrivateRoute>} />
+        <Route path="/ton-kho" element={<PrivateRoute><TonKhoSoLuong /></PrivateRoute>} />
         <Route path="/bao-cao" element={<PrivateRoute><BaoCao /></PrivateRoute>} />
       </Routes>
     </Router>
