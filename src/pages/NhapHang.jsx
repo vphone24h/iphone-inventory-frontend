@@ -1,9 +1,9 @@
-function NhapHang() {
-  console.log("📥 NhapHang.jsx (phiên bản mới) đang được render");
 import { useState } from "react";
 import LogoutButton from "../components/LogoutButton";
 
 function NhapHang() {
+  console.log("📥 NhapHang.jsx (phiên bản mới) đang được render");
+
   const [formData, setFormData] = useState({
     imei: "",
     product_name: "",
@@ -29,7 +29,7 @@ function NhapHang() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:4000/api/nhap-hang", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
