@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LogoutButton from "../components/LogoutButton"; // nhớ tạo file này đúng như hướng dẫn
+import LogoutButton from "../components/LogoutButton";
 
 function NhapHang() {
   const [formData, setFormData] = useState({
@@ -64,6 +64,34 @@ function NhapHang() {
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
       <div className="absolute top-4 right-4">
         <LogoutButton />
+      </div>
+
+      {/* 🚀 Menu điều hướng nhanh */}
+      <div className="flex justify-center space-x-2 mb-6">
+        <button
+          onClick={() => (window.location.href = "/nhap-hang")}
+          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+        >
+          📥 Nhập hàng
+        </button>
+        <button
+          onClick={() => (window.location.href = "/xuat-hang")}
+          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+        >
+          📤 Xuất hàng
+        </button>
+        <button
+          onClick={() => (window.location.href = "/ton-kho-so-luong")}
+          className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700"
+        >
+          📦 Tồn kho
+        </button>
+        <button
+          onClick={() => (window.location.href = "/bao-cao")}
+          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+        >
+          📊 Doanh thu
+        </button>
       </div>
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
@@ -148,7 +176,9 @@ function NhapHang() {
       </form>
 
       {message && (
-        <p className="mt-4 text-center font-semibold text-green-600">{message}</p>
+        <p className="mt-4 text-center font-semibold text-green-600">
+          {message}
+        </p>
       )}
     </div>
   );
