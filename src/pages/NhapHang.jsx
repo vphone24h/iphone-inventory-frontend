@@ -1,3 +1,5 @@
+function NhapHang() {
+  console.log("📥 NhapHang.jsx (phiên bản mới) đang được render");
 import { useState } from "react";
 import LogoutButton from "../components/LogoutButton";
 
