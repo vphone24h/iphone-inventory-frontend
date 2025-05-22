@@ -31,7 +31,6 @@ function BaoCao() {
       );
       const json = await res.json();
       setData(json);
-      console.log("📊 Dữ liệu báo cáo:", json); // giúp debug khi deploy
     } catch (err) {
       console.error("❌ Lỗi khi fetch báo cáo:", err);
     }
@@ -57,7 +56,7 @@ function BaoCao() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 relative">
-      {/* ✅ Nút đăng xuất */}
+      {/* Nút đăng xuất */}
       <div className="absolute top-4 right-4">
         <LogoutButton />
       </div>
@@ -124,17 +123,17 @@ function BaoCao() {
                 className="text-blue-600 font-semibold underline hover:text-blue-800 transition duration-200"
                 onClick={() => setShowDetails(!showDetails)}
               >
-                {data.totalRevenue.toLocaleString()} đ{" "}
+                {data.totalRevenue?.toLocaleString()} đ{" "}
                 <span className="text-sm font-normal">(nhấn vào xem chi tiết)</span>
               </button>
             </div>
             <div>
               <p className="text-gray-500">Chi phí</p>
-              <p>{data.totalCost.toLocaleString()} đ</p>
+              <p>{data.totalCost?.toLocaleString()} đ</p>
             </div>
             <div>
               <p className="text-gray-500">Lợi nhuận</p>
-              <p className="text-green-700">{data.totalProfit.toLocaleString()} đ</p>
+              <p className="text-green-700">{data.totalProfit?.toLocaleString()} đ</p>
             </div>
           </div>
         </div>
