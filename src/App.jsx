@@ -6,7 +6,7 @@ import ResetMatKhau from "./pages/ResetMatKhau";
 import NhapHang from "./pages/NhapHang";
 import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
-import BaoCao from "./pages/BaoCao"; // nên nằm trong /pages cho đồng nhất
+import BaoCao from "./pages/BaoCao"; // ✅ Đã sửa đúng đường dẫn
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
