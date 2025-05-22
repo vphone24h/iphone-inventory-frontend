@@ -90,7 +90,7 @@ function NhapHang() {
           onClick={() => (window.location.href = "/bao-cao")}
           className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
         >
-          📊 Doanh thu
+          📋 Báo cáo
         </button>
       </div>
 
