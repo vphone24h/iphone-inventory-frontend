@@ -12,26 +12,31 @@ function TonKhoSoLuong() {
   const [selectedSKU, setSelectedSKU] = useState(null);
   const [imeiList, setImeiList] = useState([]);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const [branchList, setBranchList] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Lấy danh sách chi nhánh để lọc động (không fix cứng)
+    fetch(`${import.meta.env.VITE_API_URL}/api/branches`)
+      .then((res) => res.json())
+      .then((branches) => setBranchList(branches))
+      .catch(() => setBranchList([]));
+
     fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`)
       .then((res) => res.json())
       .then((res) => {
-        // Debug xem có dữ liệu không
-        console.log("API trả về:", res.items);
-
+        // Nhóm theo SKU + branch + tháng nhập
         const grouped = {};
-
-        res.items.forEach((item) => {
-          // SỬA: dùng import_date thay vì ngayNhap
-          const importDate = item.import_date ? new Date(item.import_date) : null;
+        (res.items || []).forEach((item) => {
+          // Hỗ trợ cả import_date và ngayNhap/createdAt nếu dữ liệu cũ
+          const importDateRaw = item.import_date || item.ngayNhap || item.createdAt;
+          const importDate = importDateRaw ? new Date(importDateRaw) : null;
           const importMonth =
             importDate && !isNaN(importDate)
               ? `${importDate.getFullYear()}-${String(importDate.getMonth() + 1).padStart(2, "0")}`
               : "Không rõ";
 
-          const key = (item.sku || "unk") + (item.branch || "") + importMonth;
+          const key = (item.sku || "unk") + "|" + (item.branch || "") + "|" + importMonth;
           if (!grouped[key]) {
             grouped[key] = {
               sku: item.sku || "Không rõ",
@@ -40,7 +45,6 @@ function TonKhoSoLuong() {
               importMonth,
               totalImport: 0,
               totalSold: 0,
-              totalRemain: 0,
               imeis: [],
             };
           }
@@ -79,14 +83,23 @@ function TonKhoSoLuong() {
   });
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const excelData = filteredData.map(row => ({
+      "SKU": row.sku,
+      "Tên sản phẩm": row.tenSanPham,
+      "Tổng nhập": row.totalImport,
+      "Tổng xuất": row.totalSold,
+      "Còn lại": row.totalRemain,
+      "Chi nhánh": row.branch,
+      "Tháng nhập": row.importMonth
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "TonKho");
     XLSX.writeFile(workbook, "TonKho.xlsx");
   };
 
   const handleShowIMEI = (row) => {
-    setSelectedSKU(row.sku);
+    setSelectedSKU(row.sku + " - " + row.tenSanPham + " (" + row.branch + ")");
     setImeiList(row.imeis);
   };
 
@@ -96,24 +109,15 @@ function TonKhoSoLuong() {
         <LogoutButton />
       </div>
 
-      {/* ✅ Menu điều hướng */}
+      {/* Menu điều hướng */}
       <div className="flex justify-center space-x-2 mb-6">
-        <button
-          onClick={() => navigate("/nhap-hang")}
-          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-        >
+        <button onClick={() => navigate("/nhap-hang")} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
           📥 Nhập hàng
         </button>
-        <button
-          onClick={() => navigate("/xuat-hang")}
-          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-        >
+        <button onClick={() => navigate("/xuat-hang")} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
           📤 Xuất hàng
         </button>
-        <button
-          onClick={() => navigate("/bao-cao")}
-          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
-        >
+        <button onClick={() => navigate("/bao-cao")} className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">
           📋 Báo cáo
         </button>
       </div>
@@ -136,9 +140,9 @@ function TonKhoSoLuong() {
           onChange={(e) => setBranchFilter(e.target.value)}
         >
           <option value="all">Tất cả chi nhánh</option>
-          <option value="Gò Vấp">Gò Vấp</option>
-          <option value="Dĩ An">Dĩ An</option>
-          <option value="Thủ Đức">Thủ Đức</option>
+          {branchList.map(b => (
+            <option key={b._id} value={b.name}>{b.name}</option>
+          ))}
         </select>
         <input
           type="month"
@@ -216,7 +220,7 @@ function TonKhoSoLuong() {
       {selectedSKU && imeiList.length > 0 && (
         <div className="mt-6">
           <h3 className="text-lg font-bold mb-2 text-blue-600">
-            IMEI còn trong kho của SKU: {selectedSKU}
+            IMEI còn trong kho của: {selectedSKU}
           </h3>
           <ul className="list-disc pl-6">
             {imeiList.map((imei, idx) => (
