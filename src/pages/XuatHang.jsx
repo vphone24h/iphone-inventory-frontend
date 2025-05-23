@@ -15,12 +15,15 @@ function XuatHang() {
 
   const [message, setMessage] = useState("");
   const [profit, setProfit] = useState(null);
-
-  // THÊM: Quản lý danh sách đơn xuất & edit
   const [sales, setSales] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
-  // Lấy danh sách đơn xuất khi load trang hoặc khi thay đổi
+  // GỢI Ý SẢN PHẨM THEO TÊN (auto suggest)
+  const [suggestList, setSuggestList] = useState([]);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const [selectImeis, setSelectImeis] = useState([]);
+
+  // Lấy danh sách đơn xuất
   const fetchSales = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xuat-hang-list`);
@@ -29,6 +32,37 @@ function XuatHang() {
     } catch (err) {
       setSales([]);
     }
+  };
+
+  // Lấy tồn kho để gợi ý (chỉ lấy những sản phẩm còn tồn kho)
+  const fetchSuggestList = async (query) => {
+    if (!query || query.length < 2) return setSuggestList([]);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`);
+    const data = await res.json();
+    // Lọc các sản phẩm có tên gần đúng
+    const lowerQuery = query.trim().toLowerCase();
+    const filtered = (data.items || []).filter(
+      item =>
+        (item.product_name || item.tenSanPham || "")
+          .toLowerCase()
+          .includes(lowerQuery)
+    );
+
+    // Gom nhóm theo tên + sku, tổng số lượng tồn kho, list IMEI
+    const group = {};
+    filtered.forEach(item => {
+      const key = (item.product_name || item.tenSanPham || "Không rõ") + "_" + (item.sku || "Không rõ");
+      if (!group[key]) {
+        group[key] = {
+          name: item.product_name || item.tenSanPham || "Không rõ",
+          sku: item.sku || "",
+          imeis: [],
+        };
+      }
+      if (item.imei) group[key].imeis.push(item.imei);
+    });
+    setSuggestList(Object.values(group));
+    setShowSuggest(true);
   };
 
   useEffect(() => {
@@ -53,6 +87,32 @@ function XuatHang() {
     }
   };
 
+  // Khi nhập tên sản phẩm -> gợi ý (suggest)
+  const handleProductNameChange = async (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, product_name: value }));
+    fetchSuggestList(value);
+  };
+
+  // Khi chọn 1 gợi ý tên sản phẩm
+  const handleSelectSuggest = (item) => {
+    setFormData(prev => ({
+      ...prev,
+      product_name: item.name,
+      sku: item.sku,
+      imei: item.imeis.length === 1 ? item.imeis[0] : "",
+    }));
+    setShowSuggest(false);
+    setSelectImeis(item.imeis.length > 1 ? item.imeis : []);
+    // Nếu chỉ còn 1 imei thì auto điền luôn
+  };
+
+  // Nếu nhiều IMEI thì chọn tiếp
+  const handleSelectImei = (imei) => {
+    setFormData(prev => ({ ...prev, imei }));
+    setSelectImeis([]); // ẩn chọn IMEI sau khi chọn
+  };
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -60,7 +120,7 @@ function XuatHang() {
     }));
   };
 
-  // THÊM: Nộp hoặc cập nhật đơn xuất
+  // Nộp hoặc cập nhật đơn xuất
   const handleSubmit = async (e) => {
     e.preventDefault();
     setProfit(null);
@@ -139,37 +199,17 @@ function XuatHang() {
 
       {/* 🚀 Menu điều hướng nhanh */}
       <div className="flex justify-center space-x-2 mb-6">
-        <button
-          onClick={() => (window.location.href = "/nhap-hang")}
-          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-        >
-          📥 Nhập hàng
-        </button>
-        <button
-          onClick={() => (window.location.href = "/xuat-hang")}
-          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-        >
-          📤 Xuất hàng
-        </button>
-        <button
-          onClick={() => (window.location.href = "/ton-kho-so-luong")}
-          className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700"
-        >
-          📦 Tồn kho
-        </button>
-        <button
-          onClick={() => (window.location.href = "/bao-cao")}
-          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
-        >
-          📋 Báo cáo
-        </button>
+        <button onClick={() => (window.location.href = "/nhap-hang")} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">📥 Nhập hàng</button>
+        <button onClick={() => (window.location.href = "/xuat-hang")} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">📤 Xuất hàng</button>
+        <button onClick={() => (window.location.href = "/ton-kho-so-luong")} className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">📦 Tồn kho</button>
+        <button onClick={() => (window.location.href = "/bao-cao")} className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">📋 Báo cáo</button>
       </div>
 
       <h2 className="text-2xl font-bold mb-6 text-center text-red-600">
         Xuất hàng iPhone
       </h2>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 relative">
         <input
           type="text"
           name="imei"
@@ -194,14 +234,50 @@ function XuatHang() {
           onChange={handleChange}
           className={inputClass}
         />
-        <input
-          type="text"
-          name="product_name"
-          placeholder="Tên sản phẩm"
-          value={formData.product_name}
-          onChange={handleChange}
-          className={inputClass}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            name="product_name"
+            placeholder="Tên sản phẩm"
+            value={formData.product_name}
+            onChange={handleProductNameChange}
+            className={inputClass}
+            autoComplete="off"
+          />
+          {/* GỢI Ý SẢN PHẨM */}
+          {showSuggest && suggestList.length > 0 && (
+            <div className="absolute z-20 left-0 right-0 bg-white border rounded shadow max-h-60 overflow-y-auto">
+              {suggestList.map((item, idx) => (
+                <div
+                  key={item.sku + idx}
+                  className="px-3 py-2 hover:bg-blue-50 cursor-pointer flex flex-col"
+                  onClick={() => handleSelectSuggest(item)}
+                >
+                  <span className="font-medium text-blue-600">{item.name}</span>
+                  <span className="text-xs text-gray-500">SKU: {item.sku} | SL còn: {item.imeis.length} | IMEI: {item.imeis.slice(0, 5).join(", ")}{item.imeis.length > 5 ? "..." : ""}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Nếu nhiều IMEI cho 1 sản phẩm, chọn IMEI */}
+        {selectImeis.length > 1 && (
+          <div className="bg-blue-50 border rounded px-3 py-2">
+            <div className="mb-1 font-medium">Chọn IMEI:</div>
+            <div className="flex flex-wrap gap-2">
+              {selectImeis.map((im, idx) => (
+                <button
+                  type="button"
+                  className={`px-2 py-1 border rounded ${formData.imei === im ? "bg-blue-600 text-white" : "bg-white"}`}
+                  key={im + idx}
+                  onClick={() => handleSelectImei(im)}
+                >
+                  {im}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <input
           type="number"
           name="price_sell"
