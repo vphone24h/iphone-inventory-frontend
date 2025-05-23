@@ -19,11 +19,13 @@ function TonKhoSoLuong() {
       .then((res) => res.json())
       .then((res) => {
         const grouped = {};
+
         res.items.forEach((item) => {
           const importDate = new Date(item.ngayNhap);
           const importMonth = `${importDate.getFullYear()}-${String(
             importDate.getMonth() + 1
           ).padStart(2, "0")}`;
+
           const key = item.sku + (item.branch || "") + importMonth;
           if (!grouped[key]) {
             grouped[key] = {
