@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import LogoutButton from "../components/LogoutButton";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function NhapHang() {
   const [formData, setFormData] = useState({
@@ -38,10 +40,7 @@ function NhapHang() {
   }, []);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -55,26 +54,13 @@ function NhapHang() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          tenSanPham: formData.product_name || formData.tenSanPham,
-        }),
+        body: JSON.stringify({ ...formData, tenSanPham: formData.product_name || formData.tenSanPham }),
       });
 
       const data = await res.json();
       if (res.ok) {
         setMessage(`✅ ${data.message}`);
-        setFormData({
-          imei: "",
-          product_name: "",
-          sku: "",
-          price_import: "",
-          import_date: "",
-          supplier: "",
-          branch: "",
-          note: "",
-          tenSanPham: "",
-        });
+        setFormData({ imei: "", product_name: "", sku: "", price_import: "", import_date: "", supplier: "", branch: "", note: "", tenSanPham: "" });
         setEditingItemId(null);
         fetchItems();
       } else {
@@ -103,9 +89,7 @@ function NhapHang() {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xoá mục này không?")) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (res.ok) {
         setMessage(`🗑️ ${data.message}`);
@@ -118,11 +102,60 @@ function NhapHang() {
     }
   };
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.imei?.toLowerCase().includes(search.toLowerCase()) ||
-      (item.product_name || item.tenSanPham)?.toLowerCase().includes(search.toLowerCase()) ||
-      item.sku?.toLowerCase().includes(search.toLowerCase())
+  const exportToExcel = () => {
+    const dataToExport = items.map((item) => ({
+      IMEI: item.imei,
+      Tên_sản_phẩm: item.product_name || item.tenSanPham,
+      SKU: item.sku,
+      Giá_nhập: item.price_import,
+      Ngày_nhập: item.import_date?.slice(0, 10),
+      Nhà_cung_cấp: item.supplier,
+      Chi_nhánh: item.branch,
+      Ghi_chú: item.note,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "NhapHang");
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const file = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(file, "danh_sach_nhap_hang.xlsx");
+  };
+
+  const importFromExcel = async (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const wb = XLSX.read(evt.target.result, { type: "binary" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws);
+
+      for (const row of data) {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imei: row.IMEI,
+            product_name: row.Tên_sản_phẩm,
+            sku: row.SKU,
+            price_import: row.Giá_nhập,
+            import_date: row.Ngày_nhập,
+            supplier: row.Nhà_cung_cấp,
+            branch: row.Chi_nhánh,
+            note: row.Ghi_chú,
+            tenSanPham: row.Tên_sản_phẩm,
+          })
+        });
+      }
+      fetchItems();
+      alert("✅ Đã nhập từ Excel thành công!");
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  const filteredItems = items.filter((item) =>
+    item.imei?.toLowerCase().includes(search.toLowerCase()) ||
+    (item.product_name || item.tenSanPham)?.toLowerCase().includes(search.toLowerCase()) ||
+    item.sku?.toLowerCase().includes(search.toLowerCase())
   );
 
   const paginatedItems = filteredItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
@@ -134,7 +167,6 @@ function NhapHang() {
         <LogoutButton />
       </div>
 
-      {/* Menu điều hướng nhanh */}
       <div className="flex justify-center space-x-2 mb-6">
         <button onClick={() => (window.location.href = "/nhap-hang")} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">📥 Nhập hàng</button>
         <button onClick={() => (window.location.href = "/xuat-hang")} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">📤 Xuất hàng</button>
@@ -144,17 +176,18 @@ function NhapHang() {
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
 
+      <div className="flex justify-between mb-4">
+        <label className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
+          📤 Nhập từ Excel
+          <input type="file" accept=".xlsx,.xls" onChange={importFromExcel} hidden />
+        </label>
+        <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          ⬇️ Xuất Excel
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-        {Object.entries({
-          imei: "IMEI",
-          product_name: "Tên sản phẩm",
-          sku: "SKU",
-          price_import: "Giá nhập",
-          import_date: "Ngày nhập",
-          supplier: "Nhà cung cấp",
-          branch: "Chi nhánh",
-          note: "Ghi chú"
-        }).map(([key, label]) => (
+        {Object.entries({ imei: "IMEI", product_name: "Tên sản phẩm", sku: "SKU", price_import: "Giá nhập", import_date: "Ngày nhập", supplier: "Nhà cung cấp", branch: "Chi nhánh", note: "Ghi chú" }).map(([key, label]) => (
           <input
             key={key}
             type={key === "price_import" ? "number" : key === "import_date" ? "date" : "text"}
@@ -173,15 +206,8 @@ function NhapHang() {
 
       {message && <p className="mt-4 text-center font-semibold text-green-600">{message}</p>}
 
-      {/* Danh sách */}
       <div className="mt-10">
-        <input
-          type="text"
-          placeholder="🔍 Tìm kiếm IMEI, Tên, SKU..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-4 py-2 rounded w-full mb-4"
-        />
+        <input type="text" placeholder="🔍 Tìm kiếm IMEI, Tên, SKU..." value={search} onChange={(e) => setSearch(e.target.value)} className="border px-4 py-2 rounded w-full mb-4" />
         <table className="w-full border text-sm">
           <thead>
             <tr className="bg-gray-100">
@@ -217,11 +243,7 @@ function NhapHang() {
         </table>
         <div className="flex justify-center space-x-2 mt-4">
           {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-            >
+            <button key={i + 1} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
               {i + 1}
             </button>
           ))}
