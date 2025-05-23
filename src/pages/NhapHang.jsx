@@ -32,7 +32,7 @@ function NhapHang() {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`);
+      const res = await fetch(${import.meta.env.VITE_API_URL}/api/ton-kho);
       const data = await res.json();
       setItems(data.items);
     } catch (err) {
@@ -53,8 +53,8 @@ function NhapHang() {
     try {
       const method = editingItemId ? "PUT" : "POST";
       const url = editingItemId
-        ? `${import.meta.env.VITE_API_URL}/api/nhap-hang/${editingItemId}`
-        : `${import.meta.env.VITE_API_URL}/api/nhap-hang`;
+        ? ${import.meta.env.VITE_API_URL}/api/nhap-hang/${editingItemId}
+        : ${import.meta.env.VITE_API_URL}/api/nhap-hang;
 
       const res = await fetch(url, {
         method,
@@ -64,7 +64,7 @@ function NhapHang() {
 
       const data = await res.json();
       if (res.ok) {
-        setMessage(`✅ ${data.message}`);
+        setMessage(✅ ${data.message});
         setFormData({
           imei: "",
           product_name: "",
@@ -81,7 +81,7 @@ function NhapHang() {
         setEditingItemId(null);
         fetchItems();
       } else {
-        setMessage(`❌ ${data.message}`);
+        setMessage(❌ ${data.message});
       }
     } catch (err) {
       setMessage("❌ Lỗi kết nối tới server");
@@ -108,13 +108,13 @@ function NhapHang() {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xoá mục này không?")) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}`, { method: "DELETE" });
+      const res = await fetch(${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}, { method: "DELETE" });
       const data = await res.json();
       if (res.ok) {
-        setMessage(`🗑️ ${data.message}`);
+        setMessage(🗑️ ${data.message});
         fetchItems();
       } else {
-        setMessage(`❌ ${data.message}`);
+        setMessage(❌ ${data.message});
       }
     } catch (err) {
       setMessage("❌ Lỗi khi xoá mục");
@@ -150,7 +150,7 @@ function NhapHang() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws);
       for (const row of data) {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
+        await fetch(${import.meta.env.VITE_API_URL}/api/nhap-hang, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -280,7 +280,7 @@ function NhapHang() {
         </table>
         <div className="flex justify-center space-x-2 mt-4">
           {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
+            <button key={i + 1} onClick={() => setPage(i + 1)} className={px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}}>
               {i + 1}
             </button>
           ))}
