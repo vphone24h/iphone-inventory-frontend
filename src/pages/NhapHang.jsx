@@ -176,8 +176,8 @@ function NhapHang() {
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
 
-      <div className="flex justify-between mb-4">
-        <label className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
+      <div className="flex justify-between mb-4 gap-4">
+        <label className="flex items-center bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
           📤 Nhập từ Excel
           <input type="file" accept=".xlsx,.xls" onChange={importFromExcel} hidden />
         </label>
