@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 function NhapHang() {
-  // THÊM STATE QUẢN LÝ BRANCH/CATEGORY
+  // State quản lý branch/category
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showBranchModal, setShowBranchModal] = useState(false);
@@ -14,6 +14,10 @@ function NhapHang() {
   const [editBranchId, setEditBranchId] = useState(null);
   const [editCategoryId, setEditCategoryId] = useState(null);
 
+  // === Lấy mặc định branch/category từ localStorage
+  const getLocalBranch = () => localStorage.getItem('lastBranch') || "";
+  const getLocalCategory = () => localStorage.getItem('lastCategory') || "";
+
   const [formData, setFormData] = useState({
     imei: "",
     product_name: "",
@@ -21,11 +25,11 @@ function NhapHang() {
     price_import: "",
     import_date: "",
     supplier: "",
-    branch: "",
+    branch: getLocalBranch(),
     note: "",
     tenSanPham: "",
     quantity: "",
-    category: ""
+    category: getLocalCategory()
   });
 
   const [message, setMessage] = useState("");
@@ -50,7 +54,7 @@ function NhapHang() {
     }
   };
 
-  // BỔ SUNG FETCH BRANCHES VÀ CATEGORIES
+  // Bổ sung fetch branch/category
   const fetchBranches = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/branches`)
       .then(res => res.json())
@@ -68,8 +72,16 @@ function NhapHang() {
     fetchCategories();
   }, []);
 
+  // Khi chọn branch/category thì lưu vào localStorage
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === "branch") {
+      localStorage.setItem('lastBranch', value);
+    }
+    if (name === "category") {
+      localStorage.setItem('lastCategory', value);
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -96,11 +108,11 @@ function NhapHang() {
           price_import: "",
           import_date: "",
           supplier: "",
-          branch: "",
+          branch: formData.branch,       // Giữ lại branch
           note: "",
           tenSanPham: "",
           quantity: "",
-          category: ""
+          category: formData.category    // Giữ lại category
         });
         setEditingItemId(null);
         fetchItems();
@@ -212,7 +224,7 @@ function NhapHang() {
   const paginatedItems = filteredItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
-  // ----------- QUẢN LÝ BRANCH
+  // ----------- Quản lý branch
   const handleAddBranch = async () => {
     if (!branchInput.trim()) return;
     await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, {
@@ -243,7 +255,7 @@ function NhapHang() {
     fetchBranches();
   };
 
-  // ----------- QUẢN LÝ CATEGORY
+  // ----------- Quản lý category
   const handleAddCategory = async () => {
     if (!categoryInput.trim()) return;
     await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
