@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ChiTietDonHang from "./ChiTietDonHang";
 import LogoutButton from "./components/LogoutButton";
-import { useNavigate } from "react-router-dom";
 
 function BaoCao() {
   const [data, setData] = useState(null);
@@ -10,7 +9,6 @@ function BaoCao() {
   const [filter, setFilter] = useState("Hôm nay");
   const [branch, setBranch] = useState("all");
   const [showDetails, setShowDetails] = useState(false);
-  const navigate = useNavigate();
 
   const predefined = {
     "Hôm nay": [new Date(), new Date()],
@@ -58,27 +56,27 @@ function BaoCao() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 relative">
-      {/* 🔒 Đăng xuất */}
+      {/* Nút đăng xuất */}
       <div className="absolute top-4 right-4">
         <LogoutButton />
       </div>
 
-      {/* 📌 Menu điều hướng */}
+      {/* 🚀 Menu điều hướng nhanh */}
       <div className="flex justify-center space-x-2 mb-6">
         <button
-          onClick={() => navigate("/nhap-hang")}
+          onClick={() => (window.location.href = "/nhap-hang")}
           className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
         >
           📥 Nhập hàng
         </button>
         <button
-          onClick={() => navigate("/xuat-hang")}
+          onClick={() => (window.location.href = "/xuat-hang")}
           className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
         >
           📤 Xuất hàng
         </button>
         <button
-          onClick={() => navigate("/ton-kho-so-luong")}
+          onClick={() => (window.location.href = "/ton-kho-so-luong")}
           className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700"
         >
           📦 Tồn kho
