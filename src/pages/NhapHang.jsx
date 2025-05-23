@@ -4,9 +4,15 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 function NhapHang() {
-  // THÊM 2 STATE MỚI
+  // THÊM STATE QUẢN LÝ BRANCH/CATEGORY
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [showBranchModal, setShowBranchModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [branchInput, setBranchInput] = useState('');
+  const [categoryInput, setCategoryInput] = useState('');
+  const [editBranchId, setEditBranchId] = useState(null);
+  const [editCategoryId, setEditCategoryId] = useState(null);
 
   const [formData, setFormData] = useState({
     imei: "",
@@ -45,16 +51,21 @@ function NhapHang() {
   };
 
   // BỔ SUNG FETCH BRANCHES VÀ CATEGORIES
-  useEffect(() => {
-    fetchItems();
-    // fetch chi nhánh
+  const fetchBranches = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/branches`)
       .then(res => res.json())
       .then(data => setBranches(data));
-    // fetch thư mục
+  };
+  const fetchCategories = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
       .then(res => res.json())
       .then(data => setCategories(data));
+  };
+
+  useEffect(() => {
+    fetchItems();
+    fetchBranches();
+    fetchCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -201,8 +212,106 @@ function NhapHang() {
   const paginatedItems = filteredItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
+  // ----------- QUẢN LÝ BRANCH
+  const handleAddBranch = async () => {
+    if (!branchInput.trim()) return;
+    await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: branchInput.trim() })
+    });
+    setBranchInput('');
+    setShowBranchModal(false);
+    setEditBranchId(null);
+    fetchBranches();
+  };
+  const handleEditBranch = async () => {
+    if (!branchInput.trim() || !editBranchId) return;
+    await fetch(`${import.meta.env.VITE_API_URL}/api/branches/${editBranchId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: branchInput.trim() })
+    });
+    setBranchInput('');
+    setEditBranchId(null);
+    setShowBranchModal(false);
+    fetchBranches();
+  };
+  const handleDeleteBranch = async (id) => {
+    if (!window.confirm('Xoá chi nhánh này?')) return;
+    await fetch(`${import.meta.env.VITE_API_URL}/api/branches/${id}`, { method: "DELETE" });
+    fetchBranches();
+  };
+
+  // ----------- QUẢN LÝ CATEGORY
+  const handleAddCategory = async () => {
+    if (!categoryInput.trim()) return;
+    await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: categoryInput.trim() })
+    });
+    setCategoryInput('');
+    setShowCategoryModal(false);
+    setEditCategoryId(null);
+    fetchCategories();
+  };
+  const handleEditCategory = async () => {
+    if (!categoryInput.trim() || !editCategoryId) return;
+    await fetch(`${import.meta.env.VITE_API_URL}/api/categories/${editCategoryId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: categoryInput.trim() })
+    });
+    setCategoryInput('');
+    setEditCategoryId(null);
+    setShowCategoryModal(false);
+    fetchCategories();
+  };
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Xoá thư mục này?')) return;
+    await fetch(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, { method: "DELETE" });
+    fetchCategories();
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
+      {/* Modal branch */}
+      {showBranchModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+          <div className="bg-white p-6 rounded shadow-md min-w-[300px]">
+            <h3 className="mb-2 font-bold">{editBranchId ? 'Sửa chi nhánh' : 'Thêm chi nhánh'}</h3>
+            <input type="text" className="border p-2 rounded w-full mb-4" value={branchInput} onChange={e => setBranchInput(e.target.value)} />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowBranchModal(false)} className="px-3 py-1 bg-gray-200 rounded">Huỷ</button>
+              {editBranchId ? (
+                <button onClick={handleEditBranch} className="px-3 py-1 bg-blue-500 text-white rounded">Lưu</button>
+              ) : (
+                <button onClick={handleAddBranch} className="px-3 py-1 bg-green-600 text-white rounded">Thêm</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal category */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+          <div className="bg-white p-6 rounded shadow-md min-w-[300px]">
+            <h3 className="mb-2 font-bold">{editCategoryId ? 'Sửa thư mục' : 'Thêm thư mục'}</h3>
+            <input type="text" className="border p-2 rounded w-full mb-4" value={categoryInput} onChange={e => setCategoryInput(e.target.value)} />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowCategoryModal(false)} className="px-3 py-1 bg-gray-200 rounded">Huỷ</button>
+              {editCategoryId ? (
+                <button onClick={handleEditCategory} className="px-3 py-1 bg-blue-500 text-white rounded">Lưu</button>
+              ) : (
+                <button onClick={handleAddCategory} className="px-3 py-1 bg-green-600 text-white rounded">Thêm</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="absolute top-4 right-4">
         <LogoutButton />
       </div>
@@ -219,14 +328,14 @@ function NhapHang() {
       {/* ---- BỘ LỌC --- */}
       <div className="flex gap-4 mb-4">
         <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded w-40" placeholder="Ngày nhập" />
-        {/* THAY filterBranch thành dropdown */}
+        {/* filterBranch dropdown */}
         <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="border p-2 rounded w-40">
           <option value="">Chi nhánh</option>
           {branches.map(b => (
             <option key={b._id} value={b.name}>{b.name}</option>
           ))}
         </select>
-        {/* THAY filterCategory thành dropdown */}
+        {/* filterCategory dropdown */}
         <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="border p-2 rounded w-40">
           <option value="">Thư mục</option>
           {categories.map(c => (
@@ -294,13 +403,29 @@ function NhapHang() {
           onChange={handleChange}
           className={inputClass}
         />
-        {/* THAY branch bằng dropdown */}
-        <select name="branch" value={formData.branch} onChange={handleChange} className={inputClass} required>
-          <option value="">Chọn chi nhánh</option>
-          {branches.map(b => (
-            <option key={b._id} value={b.name}>{b.name}</option>
-          ))}
-        </select>
+
+        {/* Chi nhánh: dropdown + nút quản lý */}
+        <div className="flex gap-2 items-center">
+          <select name="branch" value={formData.branch} onChange={handleChange} className={inputClass} required>
+            <option value="">Chọn chi nhánh</option>
+            {branches.map(b => (
+              <option key={b._id} value={b.name}>{b.name}</option>
+            ))}
+          </select>
+          <button type="button" className="text-green-600 text-xl" title="Thêm" onClick={() => { setShowBranchModal(true); setEditBranchId(null); setBranchInput(''); }}>➕</button>
+          <button type="button" className="text-yellow-600 text-xl" title="Sửa" onClick={() => {
+            if (!formData.branch) return;
+            const br = branches.find(b => b.name === formData.branch);
+            setEditBranchId(br?._id);
+            setBranchInput(formData.branch);
+            setShowBranchModal(true);
+          }}>✏️</button>
+          <button type="button" className="text-red-600 text-xl" title="Xoá" onClick={() => {
+            const br = branches.find(b => b.name === formData.branch);
+            if (br) handleDeleteBranch(br._id);
+          }}>🗑️</button>
+        </div>
+
         <input
           name="note"
           placeholder="Ghi chú"
@@ -317,13 +442,29 @@ function NhapHang() {
           className={inputClass}
           required
         />
-        {/* THAY category bằng dropdown */}
-        <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
-          <option value="">Chọn thư mục</option>
-          {categories.map(c => (
-            <option key={c._id} value={c.name}>{c.name}</option>
-          ))}
-        </select>
+
+        {/* Thư mục: dropdown + nút quản lý */}
+        <div className="flex gap-2 items-center">
+          <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
+            <option value="">Chọn thư mục</option>
+            {categories.map(c => (
+              <option key={c._id} value={c.name}>{c.name}</option>
+            ))}
+          </select>
+          <button type="button" className="text-green-600 text-xl" title="Thêm" onClick={() => { setShowCategoryModal(true); setEditCategoryId(null); setCategoryInput(''); }}>➕</button>
+          <button type="button" className="text-yellow-600 text-xl" title="Sửa" onClick={() => {
+            if (!formData.category) return;
+            const cat = categories.find(c => c.name === formData.category);
+            setEditCategoryId(cat?._id);
+            setCategoryInput(formData.category);
+            setShowCategoryModal(true);
+          }}>✏️</button>
+          <button type="button" className="text-red-600 text-xl" title="Xoá" onClick={() => {
+            const cat = categories.find(c => c.name === formData.category);
+            if (cat) handleDeleteCategory(cat._id);
+          }}>🗑️</button>
+        </div>
+
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">
           {editingItemId ? "Cập nhật" : "Nhập hàng"}
         </button>
