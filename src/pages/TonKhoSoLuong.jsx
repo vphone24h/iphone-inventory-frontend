@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
-import LogoutButton from "../components/LogoutButton"; // ✅ Bổ sung import
+import LogoutButton from "../components/LogoutButton";
 
 function TonKhoSoLuong() {
   const [data, setData] = useState([]);
@@ -19,13 +19,11 @@ function TonKhoSoLuong() {
       .then((res) => res.json())
       .then((res) => {
         const grouped = {};
-
         res.items.forEach((item) => {
           const importDate = new Date(item.ngayNhap);
           const importMonth = `${importDate.getFullYear()}-${String(
             importDate.getMonth() + 1
           ).padStart(2, "0")}`;
-
           const key = item.sku + (item.branch || "") + importMonth;
           if (!grouped[key]) {
             grouped[key] = {
@@ -87,9 +85,30 @@ function TonKhoSoLuong() {
 
   return (
     <div className="max-w-6xl mx-auto mt-10 bg-white shadow rounded-xl p-6 relative">
-      {/* ✅ Nút đăng xuất góc phải */}
       <div className="absolute top-4 right-4">
         <LogoutButton />
+      </div>
+
+      {/* ✅ Menu điều hướng */}
+      <div className="flex justify-center space-x-2 mb-6">
+        <button
+          onClick={() => navigate("/nhap-hang")}
+          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+        >
+          📥 Nhập hàng
+        </button>
+        <button
+          onClick={() => navigate("/xuat-hang")}
+          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+        >
+          📤 Xuất hàng
+        </button>
+        <button
+          onClick={() => navigate("/bao-cao")}
+          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+        >
+          📋 Báo cáo
+        </button>
       </div>
 
       <h2 className="text-2xl font-bold text-center text-green-600 mb-6">
