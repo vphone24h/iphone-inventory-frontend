@@ -88,7 +88,7 @@ function NhapHang() {
   const handleEdit = (item) => {
     setFormData({
       imei: item.imei,
-      product_name: item.tenSanPham,
+      product_name: item.product_name || item.tenSanPham,
       sku: item.sku,
       price_import: item.price_import,
       import_date: item.import_date?.slice(0, 10) || "",
@@ -121,7 +121,7 @@ function NhapHang() {
   const filteredItems = items.filter(
     (item) =>
       item.imei?.toLowerCase().includes(search.toLowerCase()) ||
-      item.tenSanPham?.toLowerCase().includes(search.toLowerCase()) ||
+      (item.product_name || item.tenSanPham)?.toLowerCase().includes(search.toLowerCase()) ||
       item.sku?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -144,7 +144,6 @@ function NhapHang() {
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
 
-      {/* Form nhập */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         {Object.entries({
           imei: "IMEI",
@@ -201,7 +200,7 @@ function NhapHang() {
             {paginatedItems.map((item) => (
               <tr key={item._id}>
                 <td className="border p-2">{item.imei}</td>
-                <td className="border p-2">{item.tenSanPham}</td>
+                <td className="border p-2">{item.product_name || item.tenSanPham}</td>
                 <td className="border p-2">{item.sku}</td>
                 <td className="border p-2 text-center">{item.price_import?.toLocaleString()}đ</td>
                 <td className="border p-2">{item.import_date?.slice(0, 10)}</td>
