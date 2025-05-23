@@ -90,8 +90,8 @@ function NhapHang() {
       imei: item.imei,
       product_name: item.tenSanPham,
       sku: item.sku,
-      price_import: item.giaNhap,
-      import_date: item.ngayNhap?.slice(0, 10) || "",
+      price_import: item.price_import, // ✅ Sửa đúng tên
+      import_date: item.import_date?.slice(0, 10) || "", // ✅ Sửa đúng tên
       supplier: item.supplier,
       branch: item.branch,
       note: item.note,
@@ -203,8 +203,8 @@ function NhapHang() {
                 <td className="border p-2">{item.imei}</td>
                 <td className="border p-2">{item.tenSanPham}</td>
                 <td className="border p-2">{item.sku}</td>
-                <td className="border p-2 text-center">{item.giaNhap?.toLocaleString()}đ</td>
-                <td className="border p-2">{item.ngayNhap?.slice(0, 10)}</td>
+                <td className="border p-2 text-center">{item.price_import?.toLocaleString()}đ</td>
+                <td className="border p-2">{item.import_date?.slice(0, 10)}</td>
                 <td className="border p-2">{item.supplier}</td>
                 <td className="border p-2">{item.branch}</td>
                 <td className="border p-2">{item.note}</td>
