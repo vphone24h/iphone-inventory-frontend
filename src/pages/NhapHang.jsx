@@ -14,6 +14,8 @@ function NhapHang() {
     branch: "",
     note: "",
     tenSanPham: "",
+    quantity: "",
+    category: ""
   });
 
   const [message, setMessage] = useState("");
@@ -60,7 +62,19 @@ function NhapHang() {
       const data = await res.json();
       if (res.ok) {
         setMessage(`✅ ${data.message}`);
-        setFormData({ imei: "", product_name: "", sku: "", price_import: "", import_date: "", supplier: "", branch: "", note: "", tenSanPham: "" });
+        setFormData({
+          imei: "",
+          product_name: "",
+          sku: "",
+          price_import: "",
+          import_date: "",
+          supplier: "",
+          branch: "",
+          note: "",
+          tenSanPham: "",
+          quantity: "",
+          category: ""
+        });
         setEditingItemId(null);
         fetchItems();
       } else {
@@ -82,6 +96,8 @@ function NhapHang() {
       branch: item.branch,
       note: item.note,
       tenSanPham: item.tenSanPham,
+      quantity: item.quantity || "",
+      category: item.category || ""
     });
     setEditingItemId(item._id);
   };
@@ -112,6 +128,8 @@ function NhapHang() {
       Nhà_cung_cấp: item.supplier,
       Chi_nhánh: item.branch,
       Ghi_chú: item.note,
+      Số_lượng: item.quantity,
+      Thư_mục: item.category
     }));
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
@@ -142,7 +160,9 @@ function NhapHang() {
             supplier: row.Nhà_cung_cấp,
             branch: row.Chi_nhánh,
             note: row.Ghi_chú,
-            tenSanPham: row.Tên_sản_phẩm,
+            quantity: row.Số_lượng,
+            category: row.Thư_mục,
+            tenSanPham: row.Tên_sản_phẩm
           })
         });
       }
@@ -187,16 +207,27 @@ function NhapHang() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-        {Object.entries({ imei: "IMEI", product_name: "Tên sản phẩm", sku: "SKU", price_import: "Giá nhập", import_date: "Ngày nhập", supplier: "Nhà cung cấp", branch: "Chi nhánh", note: "Ghi chú" }).map(([key, label]) => (
+        {Object.entries({
+          imei: "IMEI",
+          product_name: "Tên sản phẩm",
+          sku: "SKU",
+          price_import: "Giá nhập",
+          import_date: "Ngày nhập",
+          supplier: "Nhà cung cấp",
+          branch: "Chi nhánh",
+          note: "Ghi chú",
+          quantity: "Số lượng",
+          category: "Thư mục"
+        }).map(([key, label]) => (
           <input
             key={key}
-            type={key === "price_import" ? "number" : key === "import_date" ? "date" : "text"}
+            type={key === "price_import" || key === "quantity" ? "number" : key === "import_date" ? "date" : "text"}
             name={key}
             placeholder={label}
-            value={formData[key]}
+            value={formData[key] || ""}
             onChange={handleChange}
             className={inputClass}
-            required={key !== "note" && key !== "supplier" && key !== "branch"}
+            required={key !== "imei" && key !== "note" && key !== "supplier" && key !== "branch" && key !== "category"}
           />
         ))}
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">
@@ -216,6 +247,8 @@ function NhapHang() {
               <th className="border p-2">SKU</th>
               <th className="border p-2 text-center">Giá nhập</th>
               <th className="border p-2">Ngày nhập</th>
+              <th className="border p-2">Số lượng</th>
+              <th className="border p-2">Thư mục</th>
               <th className="border p-2">Nhà cung cấp</th>
               <th className="border p-2">Chi nhánh</th>
               <th className="border p-2">Ghi chú</th>
@@ -230,6 +263,8 @@ function NhapHang() {
                 <td className="border p-2">{item.sku}</td>
                 <td className="border p-2 text-center">{item.price_import?.toLocaleString()}đ</td>
                 <td className="border p-2">{item.import_date?.slice(0, 10)}</td>
+                <td className="border p-2">{item.quantity}</td>
+                <td className="border p-2">{item.category}</td>
                 <td className="border p-2">{item.supplier}</td>
                 <td className="border p-2">{item.branch}</td>
                 <td className="border p-2">{item.note}</td>
