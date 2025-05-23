@@ -15,22 +15,27 @@ function TonKhoSoLuong() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/ton-kho")
+    fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`)
       .then((res) => res.json())
       .then((res) => {
+        // Debug xem có dữ liệu không
+        console.log("API trả về:", res.items);
+
         const grouped = {};
 
         res.items.forEach((item) => {
-          const importDate = new Date(item.ngayNhap);
-          const importMonth = `${importDate.getFullYear()}-${String(
-            importDate.getMonth() + 1
-          ).padStart(2, "0")}`;
+          // SỬA: dùng import_date thay vì ngayNhap
+          const importDate = item.import_date ? new Date(item.import_date) : null;
+          const importMonth =
+            importDate && !isNaN(importDate)
+              ? `${importDate.getFullYear()}-${String(importDate.getMonth() + 1).padStart(2, "0")}`
+              : "Không rõ";
 
-          const key = item.sku + (item.branch || "") + importMonth;
+          const key = (item.sku || "unk") + (item.branch || "") + importMonth;
           if (!grouped[key]) {
             grouped[key] = {
               sku: item.sku || "Không rõ",
-              tenSanPham: item.tenSanPham || "Không rõ",
+              tenSanPham: item.tenSanPham || item.product_name || "Không rõ",
               branch: item.branch || "Mặc định",
               importMonth,
               totalImport: 0,
@@ -165,6 +170,8 @@ function TonKhoSoLuong() {
 
       {loading ? (
         <p className="text-center">Đang tải dữ liệu...</p>
+      ) : filteredData.length === 0 ? (
+        <p className="text-center text-gray-500">Không có dữ liệu tồn kho phù hợp.</p>
       ) : (
         <table className="w-full border text-sm">
           <thead>
