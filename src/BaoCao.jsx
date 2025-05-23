@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ChiTietDonHang from "./ChiTietDonHang";
 import LogoutButton from "./components/LogoutButton";
+import { useNavigate } from "react-router-dom";
 
 function BaoCao() {
   const [data, setData] = useState(null);
@@ -9,6 +10,7 @@ function BaoCao() {
   const [filter, setFilter] = useState("Hôm nay");
   const [branch, setBranch] = useState("all");
   const [showDetails, setShowDetails] = useState(false);
+  const navigate = useNavigate();
 
   const predefined = {
     "Hôm nay": [new Date(), new Date()],
@@ -56,9 +58,31 @@ function BaoCao() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 relative">
-      {/* Nút đăng xuất */}
+      {/* 🔒 Đăng xuất */}
       <div className="absolute top-4 right-4">
         <LogoutButton />
+      </div>
+
+      {/* 📌 Menu điều hướng */}
+      <div className="flex justify-center space-x-2 mb-6">
+        <button
+          onClick={() => navigate("/nhap-hang")}
+          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+        >
+          📥 Nhập hàng
+        </button>
+        <button
+          onClick={() => navigate("/xuat-hang")}
+          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+        >
+          📤 Xuất hàng
+        </button>
+        <button
+          onClick={() => navigate("/ton-kho-so-luong")}
+          className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700"
+        >
+          📦 Tồn kho
+        </button>
       </div>
 
       <h2 className="text-2xl font-bold mb-4">📊 Báo cáo lợi nhuận</h2>
