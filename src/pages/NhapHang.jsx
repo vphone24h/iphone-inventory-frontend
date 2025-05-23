@@ -21,6 +21,9 @@ function NhapHang() {
   const [message, setMessage] = useState("");
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [filterBranch, setFilterBranch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 20;
   const [editingItemId, setEditingItemId] = useState(null);
@@ -56,7 +59,7 @@ function NhapHang() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, tenSanPham: formData.product_name || formData.tenSanPham }),
+        body: JSON.stringify({ ...formData, tenSanPham: formData.product_name || formData.tenSanPham })
       });
 
       const data = await res.json();
@@ -125,11 +128,11 @@ function NhapHang() {
       SKU: item.sku,
       Giá_nhập: item.price_import,
       Ngày_nhập: item.import_date?.slice(0, 10),
+      Số_lượng: item.quantity,
+      Thư_mục: item.category,
       Nhà_cung_cấp: item.supplier,
       Chi_nhánh: item.branch,
-      Ghi_chú: item.note,
-      Số_lượng: item.quantity,
-      Thư_mục: item.category
+      Ghi_chú: item.note
     }));
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
@@ -146,7 +149,6 @@ function NhapHang() {
       const wb = XLSX.read(evt.target.result, { type: "binary" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws);
-
       for (const row of data) {
         await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
           method: "POST",
@@ -172,11 +174,16 @@ function NhapHang() {
     reader.readAsBinaryString(file);
   };
 
-  const filteredItems = items.filter((item) =>
-    item.imei?.toLowerCase().includes(search.toLowerCase()) ||
-    (item.product_name || item.tenSanPham)?.toLowerCase().includes(search.toLowerCase()) ||
-    item.sku?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = items.filter((item) => {
+    const matchSearch =
+      item.imei?.toLowerCase().includes(search.toLowerCase()) ||
+      (item.product_name || item.tenSanPham)?.toLowerCase().includes(search.toLowerCase()) ||
+      item.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchDate = filterDate ? item.import_date?.slice(0, 10) === filterDate : true;
+    const matchBranch = filterBranch ? item.branch === filterBranch : true;
+    const matchCategory = filterCategory ? item.category === filterCategory : true;
+    return matchSearch && matchDate && matchBranch && matchCategory;
+  });
 
   const paginatedItems = filteredItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -196,6 +203,12 @@ function NhapHang() {
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
 
+      <div className="flex gap-4 mb-4">
+        <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded w-40" placeholder="Ngày nhập" />
+        <input type="text" value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="border p-2 rounded w-40" placeholder="Chi nhánh" />
+        <input type="text" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="border p-2 rounded w-40" placeholder="Thư mục" />
+      </div>
+
       <div className="flex justify-between mb-4 gap-4">
         <label className="flex items-center bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
           📤 Nhập từ Excel
@@ -207,18 +220,7 @@ function NhapHang() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-        {Object.entries({
-          imei: "IMEI",
-          product_name: "Tên sản phẩm",
-          sku: "SKU",
-          price_import: "Giá nhập",
-          import_date: "Ngày nhập",
-          supplier: "Nhà cung cấp",
-          branch: "Chi nhánh",
-          note: "Ghi chú",
-          quantity: "Số lượng",
-          category: "Thư mục"
-        }).map(([key, label]) => (
+        {Object.entries({ imei: "IMEI", product_name: "Tên sản phẩm", sku: "SKU", price_import: "Giá nhập", import_date: "Ngày nhập", supplier: "Nhà cung cấp", branch: "Chi nhánh", note: "Ghi chú", quantity: "Số lượng", category: "Thư mục" }).map(([key, label]) => (
           <input
             key={key}
             type={key === "price_import" || key === "quantity" ? "number" : key === "import_date" ? "date" : "text"}
