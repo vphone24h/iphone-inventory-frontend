@@ -90,8 +90,8 @@ function NhapHang() {
       imei: item.imei,
       product_name: item.tenSanPham,
       sku: item.sku,
-      price_import: item.price_import, // ✅ Sửa đúng tên
-      import_date: item.import_date?.slice(0, 10) || "", // ✅ Sửa đúng tên
+      price_import: item.price_import,
+      import_date: item.import_date?.slice(0, 10) || "",
       supplier: item.supplier,
       branch: item.branch,
       note: item.note,
