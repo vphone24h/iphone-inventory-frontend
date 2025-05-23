@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LogoutButton from "../components/LogoutButton"; // Thêm dòng này
+import LogoutButton from "../components/LogoutButton";
 
 function XuatHang() {
   const [formData, setFormData] = useState({
@@ -61,12 +61,42 @@ function XuatHang() {
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
-      {/* Nút đăng xuất ở góc trên bên phải */}
+      {/* Đăng xuất */}
       <div className="absolute top-4 right-4">
         <LogoutButton />
       </div>
 
-      <h2 className="text-2xl font-bold mb-6 text-center text-red-600">Xuất hàng iPhone</h2>
+      {/* 🚀 Menu điều hướng nhanh */}
+      <div className="flex justify-center space-x-2 mb-6">
+        <button
+          onClick={() => (window.location.href = "/nhap-hang")}
+          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+        >
+          📥 Nhập hàng
+        </button>
+        <button
+          onClick={() => (window.location.href = "/xuat-hang")}
+          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+        >
+          📤 Xuất hàng
+        </button>
+        <button
+          onClick={() => (window.location.href = "/ton-kho-so-luong")}
+          className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700"
+        >
+          📦 Tồn kho
+        </button>
+        <button
+          onClick={() => (window.location.href = "/bao-cao")}
+          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+        >
+          📋 Báo cáo
+        </button>
+      </div>
+
+      <h2 className="text-2xl font-bold mb-6 text-center text-red-600">
+        Xuất hàng iPhone
+      </h2>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         <input
