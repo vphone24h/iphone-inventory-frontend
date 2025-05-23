@@ -47,16 +47,34 @@ function NhapHang() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
-        method: editingItemId ? "PUT" : "POST",
+      const method = editingItemId ? "PUT" : "POST";
+      const url = editingItemId
+        ? `${import.meta.env.VITE_API_URL}/api/nhap-hang/${editingItemId}`
+        : `${import.meta.env.VITE_API_URL}/api/nhap-hang`;
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, tenSanPham: formData.product_name || formData.tenSanPham, id: editingItemId }),
+        body: JSON.stringify({
+          ...formData,
+          tenSanPham: formData.product_name || formData.tenSanPham,
+        }),
       });
 
       const data = await res.json();
       if (res.ok) {
         setMessage(`✅ ${data.message}`);
-        setFormData({ imei: "", product_name: "", sku: "", price_import: "", import_date: "", supplier: "", branch: "", note: "", tenSanPham: "" });
+        setFormData({
+          imei: "",
+          product_name: "",
+          sku: "",
+          price_import: "",
+          import_date: "",
+          supplier: "",
+          branch: "",
+          note: "",
+          tenSanPham: "",
+        });
         setEditingItemId(null);
         fetchItems();
       } else {
@@ -85,7 +103,9 @@ function NhapHang() {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xoá mục này không?")) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xoa-nhap/${id}`, { method: "DELETE" });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       if (res.ok) {
         setMessage(`🗑️ ${data.message}`);
@@ -114,6 +134,7 @@ function NhapHang() {
         <LogoutButton />
       </div>
 
+      {/* Menu điều hướng nhanh */}
       <div className="flex justify-center space-x-2 mb-6">
         <button onClick={() => (window.location.href = "/nhap-hang")} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">📥 Nhập hàng</button>
         <button onClick={() => (window.location.href = "/xuat-hang")} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">📤 Xuất hàng</button>
@@ -123,8 +144,18 @@ function NhapHang() {
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
 
+      {/* Form nhập */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-        {Object.entries({ imei: "IMEI", product_name: "Tên sản phẩm", sku: "SKU", price_import: "Giá nhập", import_date: "Ngày nhập", supplier: "Nhà cung cấp", branch: "Chi nhánh", note: "Ghi chú" }).map(([key, label]) => (
+        {Object.entries({
+          imei: "IMEI",
+          product_name: "Tên sản phẩm",
+          sku: "SKU",
+          price_import: "Giá nhập",
+          import_date: "Ngày nhập",
+          supplier: "Nhà cung cấp",
+          branch: "Chi nhánh",
+          note: "Ghi chú"
+        }).map(([key, label]) => (
           <input
             key={key}
             type={key === "price_import" ? "number" : key === "import_date" ? "date" : "text"}
@@ -143,6 +174,7 @@ function NhapHang() {
 
       {message && <p className="mt-4 text-center font-semibold text-green-600">{message}</p>}
 
+      {/* Danh sách */}
       <div className="mt-10">
         <input
           type="text"
