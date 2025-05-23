@@ -4,6 +4,10 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 function NhapHang() {
+  // THÊM 2 STATE MỚI
+  const [branches, setBranches] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   const [formData, setFormData] = useState({
     imei: "",
     product_name: "",
@@ -32,7 +36,7 @@ function NhapHang() {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch(${import.meta.env.VITE_API_URL}/api/ton-kho);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`);
       const data = await res.json();
       setItems(data.items);
     } catch (err) {
@@ -40,8 +44,17 @@ function NhapHang() {
     }
   };
 
+  // BỔ SUNG FETCH BRANCHES VÀ CATEGORIES
   useEffect(() => {
     fetchItems();
+    // fetch chi nhánh
+    fetch(`${import.meta.env.VITE_API_URL}/api/branches`)
+      .then(res => res.json())
+      .then(data => setBranches(data));
+    // fetch thư mục
+    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
+      .then(res => res.json())
+      .then(data => setCategories(data));
   }, []);
 
   const handleChange = (e) => {
@@ -53,8 +66,8 @@ function NhapHang() {
     try {
       const method = editingItemId ? "PUT" : "POST";
       const url = editingItemId
-        ? ${import.meta.env.VITE_API_URL}/api/nhap-hang/${editingItemId}
-        : ${import.meta.env.VITE_API_URL}/api/nhap-hang;
+        ? `${import.meta.env.VITE_API_URL}/api/nhap-hang/${editingItemId}`
+        : `${import.meta.env.VITE_API_URL}/api/nhap-hang`;
 
       const res = await fetch(url, {
         method,
@@ -64,7 +77,7 @@ function NhapHang() {
 
       const data = await res.json();
       if (res.ok) {
-        setMessage(✅ ${data.message});
+        setMessage(`✅ ${data.message}`);
         setFormData({
           imei: "",
           product_name: "",
@@ -81,7 +94,7 @@ function NhapHang() {
         setEditingItemId(null);
         fetchItems();
       } else {
-        setMessage(❌ ${data.message});
+        setMessage(`❌ ${data.message}`);
       }
     } catch (err) {
       setMessage("❌ Lỗi kết nối tới server");
@@ -108,13 +121,13 @@ function NhapHang() {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xoá mục này không?")) return;
     try {
-      const res = await fetch(${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}, { method: "DELETE" });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (res.ok) {
-        setMessage(🗑️ ${data.message});
+        setMessage(`🗑️ ${data.message}`);
         fetchItems();
       } else {
-        setMessage(❌ ${data.message});
+        setMessage(`❌ ${data.message}`);
       }
     } catch (err) {
       setMessage("❌ Lỗi khi xoá mục");
@@ -150,7 +163,7 @@ function NhapHang() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws);
       for (const row of data) {
-        await fetch(${import.meta.env.VITE_API_URL}/api/nhap-hang, {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -203,10 +216,23 @@ function NhapHang() {
 
       <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
 
+      {/* ---- BỘ LỌC --- */}
       <div className="flex gap-4 mb-4">
         <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded w-40" placeholder="Ngày nhập" />
-        <input type="text" value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="border p-2 rounded w-40" placeholder="Chi nhánh" />
-        <input type="text" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="border p-2 rounded w-40" placeholder="Thư mục" />
+        {/* THAY filterBranch thành dropdown */}
+        <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="border p-2 rounded w-40">
+          <option value="">Chi nhánh</option>
+          {branches.map(b => (
+            <option key={b._id} value={b.name}>{b.name}</option>
+          ))}
+        </select>
+        {/* THAY filterCategory thành dropdown */}
+        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="border p-2 rounded w-40">
+          <option value="">Thư mục</option>
+          {categories.map(c => (
+            <option key={c._id} value={c.name}>{c.name}</option>
+          ))}
+        </select>
       </div>
 
       <div className="flex justify-between mb-4 gap-4">
@@ -220,18 +246,84 @@ function NhapHang() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-        {Object.entries({ imei: "IMEI", product_name: "Tên sản phẩm", sku: "SKU", price_import: "Giá nhập", import_date: "Ngày nhập", supplier: "Nhà cung cấp", branch: "Chi nhánh", note: "Ghi chú", quantity: "Số lượng", category: "Thư mục" }).map(([key, label]) => (
-          <input
-            key={key}
-            type={key === "price_import" || key === "quantity" ? "number" : key === "import_date" ? "date" : "text"}
-            name={key}
-            placeholder={label}
-            value={formData[key] || ""}
-            onChange={handleChange}
-            className={inputClass}
-            required={key !== "imei" && key !== "note" && key !== "supplier" && key !== "branch" && key !== "category"}
-          />
-        ))}
+        <input
+          name="imei"
+          placeholder="IMEI"
+          value={formData.imei}
+          onChange={handleChange}
+          className={inputClass}
+        />
+        <input
+          name="product_name"
+          placeholder="Tên sản phẩm"
+          value={formData.product_name}
+          onChange={handleChange}
+          className={inputClass}
+          required
+        />
+        <input
+          name="sku"
+          placeholder="SKU"
+          value={formData.sku}
+          onChange={handleChange}
+          className={inputClass}
+          required
+        />
+        <input
+          name="price_import"
+          type="number"
+          placeholder="Giá nhập"
+          value={formData.price_import}
+          onChange={handleChange}
+          className={inputClass}
+          required
+        />
+        <input
+          name="import_date"
+          type="date"
+          placeholder="Ngày nhập"
+          value={formData.import_date}
+          onChange={handleChange}
+          className={inputClass}
+          required
+        />
+        <input
+          name="supplier"
+          placeholder="Nhà cung cấp"
+          value={formData.supplier}
+          onChange={handleChange}
+          className={inputClass}
+        />
+        {/* THAY branch bằng dropdown */}
+        <select name="branch" value={formData.branch} onChange={handleChange} className={inputClass} required>
+          <option value="">Chọn chi nhánh</option>
+          {branches.map(b => (
+            <option key={b._id} value={b.name}>{b.name}</option>
+          ))}
+        </select>
+        <input
+          name="note"
+          placeholder="Ghi chú"
+          value={formData.note}
+          onChange={handleChange}
+          className={inputClass}
+        />
+        <input
+          name="quantity"
+          type="number"
+          placeholder="Số lượng"
+          value={formData.quantity}
+          onChange={handleChange}
+          className={inputClass}
+          required
+        />
+        {/* THAY category bằng dropdown */}
+        <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
+          <option value="">Chọn thư mục</option>
+          {categories.map(c => (
+            <option key={c._id} value={c.name}>{c.name}</option>
+          ))}
+        </select>
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">
           {editingItemId ? "Cập nhật" : "Nhập hàng"}
         </button>
@@ -280,7 +372,7 @@ function NhapHang() {
         </table>
         <div className="flex justify-center space-x-2 mt-4">
           {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => setPage(i + 1)} className={px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}}>
+            <button key={i + 1} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
               {i + 1}
             </button>
           ))}
