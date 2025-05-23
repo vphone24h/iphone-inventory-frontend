@@ -104,7 +104,6 @@ function XuatHang() {
     }));
     setShowSuggest(false);
     setSelectImeis(item.imeis.length > 1 ? item.imeis : []);
-    // Nếu chỉ còn 1 imei thì auto điền luôn
   };
 
   // Nếu nhiều IMEI thì chọn tiếp
@@ -217,7 +216,7 @@ function XuatHang() {
           value={formData.imei}
           onChange={handleImeiChange}
           className={inputClass}
-          required
+          // KHÔNG required
         />
         <input
           type="date"
