@@ -9,9 +9,10 @@ function XuatHang() {
     product_name: "",
     price_sell: "",
     customer_name: "",
+    customer_phone: "", // <-- Thêm trường SĐT khách hàng
     warranty: "",
     note: "",
-    debt: "",   // <--- Trường công nợ
+    debt: "",
   });
 
   const [message, setMessage] = useState("");
@@ -159,9 +160,10 @@ function XuatHang() {
           product_name: "",
           price_sell: "",
           customer_name: "",
+          customer_phone: "", // reset SĐT khách
           warranty: "",
           note: "",
-          debt: "",   // reset công nợ
+          debt: "",
         });
         setEditingId(null);
         setSelectImeis([]);
@@ -183,9 +185,10 @@ function XuatHang() {
       product_name: item.product_name || "",
       price_sell: item.price_sell || "",
       customer_name: item.customer_name || "",
+      customer_phone: item.customer_phone || "", // Thêm SĐT khách hàng khi sửa
       warranty: item.warranty || "",
       note: item.note || "",
-      debt: item.debt || "",   // sửa công nợ
+      debt: item.debt || "",
     });
     setEditingId(item._id);
     setMessage("");
@@ -205,7 +208,7 @@ function XuatHang() {
   // --- Phần lọc/tìm kiếm/sắp xếp ---
   const filteredSales = sales
     .filter(item => {
-      const text = (item.imei || "") + " " + (item.product_name || "") + " " + (item.sku || "");
+      const text = (item.imei || "") + " " + (item.product_name || "") + " " + (item.sku || "") + " " + (item.customer_phone || "");
       const searchOK = searchText === "" || text.toLowerCase().includes(searchText.toLowerCase());
       const dateOK = filterDate === "" || (item.sold_date && item.sold_date.slice(0, 10) === filterDate);
       return searchOK && dateOK;
@@ -329,6 +332,14 @@ function XuatHang() {
         />
         <input
           type="text"
+          name="customer_phone"
+          placeholder="SĐT khách hàng"
+          value={formData.customer_phone}
+          onChange={handleChange}
+          className={inputClass}
+        />
+        <input
+          type="text"
           name="warranty"
           placeholder="Bảo hành (VD: 6 tháng)"
           value={formData.warranty}
@@ -376,7 +387,7 @@ function XuatHang() {
       <div className="flex gap-3 mb-4 mt-10">
         <input
           type="text"
-          placeholder="🔎 Tìm kiếm IMEI, tên, SKU..."
+          placeholder="🔎 Tìm kiếm IMEI, tên, SKU, SĐT KH..."
           value={searchText}
           onChange={e => setSearchText(e.target.value)}
           className="border rounded px-3 py-2 flex-1"
@@ -408,6 +419,7 @@ function XuatHang() {
               <th className="border p-2 text-center">Giá bán</th>
               <th className="border p-2">Ngày bán</th>
               <th className="border p-2">Khách hàng</th>
+              <th className="border p-2">SĐT KH</th>
               <th className="border p-2">Bảo hành</th>
               <th className="border p-2">Ghi chú</th>
               <th className="border p-2">Công nợ</th>
@@ -423,6 +435,7 @@ function XuatHang() {
                 <td className="border p-2 text-center">{item.price_sell ? Number(item.price_sell).toLocaleString() : ""}đ</td>
                 <td className="border p-2">{item.sold_date ? item.sold_date.slice(0, 10) : ""}</td>
                 <td className="border p-2">{item.customer_name || ""}</td>
+                <td className="border p-2">{item.customer_phone || ""}</td>
                 <td className="border p-2">{item.warranty || ""}</td>
                 <td className="border p-2">{item.note || ""}</td>
                 <td className="border p-2 text-center">{item.debt ? Number(item.debt).toLocaleString() : ""}</td>
@@ -434,7 +447,7 @@ function XuatHang() {
             ))}
             {filteredSales.length === 0 && (
               <tr>
-                <td colSpan="10" className="text-center py-4 text-gray-500">
+                <td colSpan="11" className="text-center py-4 text-gray-500">
                   Không có đơn xuất nào.
                 </td>
               </tr>
