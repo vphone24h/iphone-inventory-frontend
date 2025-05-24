@@ -9,7 +9,7 @@ function CongNo() {
 
   // Lấy danh sách khách hàng còn nợ
   const fetchDebts = async () => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no-list`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-list`);
     const data = await res.json();
     setDebts(data.items || []);
   };
@@ -18,7 +18,7 @@ function CongNo() {
   const handleSelectCustomer = async (customer_name) => {
     setSelectedCustomer(customer_name);
     // Lấy danh sách đơn còn nợ của khách này
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no-orders?customer_name=${encodeURIComponent(customer_name)}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-orders?customer_name=${encodeURIComponent(customer_name)}`);
     const data = await res.json();
     setOrders(data.orders || []);
   };
@@ -26,7 +26,7 @@ function CongNo() {
   // Cập nhật/trả nợ cho khách này
   const handlePayDebt = async (orderId) => {
     if (!payAmount || isNaN(payAmount)) return alert("Nhập số tiền muốn trả");
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no-pay/${orderId}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-pay/${orderId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: payAmount }),
