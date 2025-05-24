@@ -3,8 +3,7 @@ import LogoutButton from "../components/LogoutButton";
 
 function CongNo() {
   const [debts, setDebts] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [customerPhone, setCustomerPhone] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState(null); // {customer_name, customer_phone, ...}
   const [customerDebt, setCustomerDebt] = useState({ total_debt: 0, total_paid: 0, debt_history: [] });
   const [payAmount, setPayAmount] = useState("");
   const [addAmount, setAddAmount] = useState("");
@@ -18,10 +17,9 @@ function CongNo() {
     setDebts(data.items || []);
   };
 
-  // Chọn khách hàng để thao tác tổng
+  // Chọn khách hàng để thao tác tổng (truyền cả object khách)
   const handleSelectCustomer = (customer) => {
-    setSelectedCustomer(customer.customer_name);
-    setCustomerPhone(customer.customer_phone || "");
+    setSelectedCustomer(customer); // lưu nguyên object {customer_name, customer_phone,...}
     setCustomerDebt({
       total_debt: customer.total_debt || 0,
       total_paid: customer.total_paid || 0,
@@ -31,14 +29,15 @@ function CongNo() {
     setAddAmount("");
   };
 
-  // Trừ nợ tổng cho khách
+  // Trừ nợ tổng cho khách (truyền cả customer_name & customer_phone)
   const handlePayDebt = async () => {
     if (!payAmount || isNaN(payAmount)) return alert("Nhập số tiền muốn trả");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-pay-customer`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customer_name: selectedCustomer,
+        customer_name: selectedCustomer.customer_name,
+        customer_phone: selectedCustomer.customer_phone,
         amount: payAmount
       }),
     });
@@ -58,14 +57,15 @@ function CongNo() {
     }
   };
 
-  // Cộng thêm nợ tổng cho khách
+  // Cộng thêm nợ tổng cho khách (truyền cả customer_name & customer_phone)
   const handleAddDebt = async () => {
     if (!addAmount || isNaN(addAmount)) return alert("Nhập số tiền muốn cộng nợ");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-add-customer`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customer_name: selectedCustomer,
+        customer_name: selectedCustomer.customer_name,
+        customer_phone: selectedCustomer.customer_phone,
         amount: addAmount
       }),
     });
@@ -91,8 +91,10 @@ function CongNo() {
   };
 
   // Xem chi tiết sản phẩm khách đã mua
-  const handleShowDetail = async (customer_name) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-orders?customer_name=${encodeURIComponent(customer_name)}`);
+  const handleShowDetail = async (customer) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-orders?customer_name=${encodeURIComponent(customer.customer_name)}&customer_phone=${encodeURIComponent(customer.customer_phone || "")}`
+    );
     const data = await res.json();
     setDetailModal({ open: true, orders: data.orders || [] });
   };
@@ -160,7 +162,7 @@ function CongNo() {
                   <td className="border p-2 text-center">
                     <button
                       className="bg-yellow-400 text-black px-2 py-1 rounded"
-                      onClick={() => handleShowDetail(debt.customer_name)}
+                      onClick={() => handleShowDetail(debt)}
                     >
                       Xem chi tiết
                     </button>
@@ -185,10 +187,10 @@ function CongNo() {
           <div className="flex justify-between items-center mb-2">
             <div>
               <h3 className="font-semibold">
-                Công nợ của: <span className="text-blue-700">{selectedCustomer}</span>
-                {customerPhone && (
+                Công nợ của: <span className="text-blue-700">{selectedCustomer.customer_name}</span>
+                {selectedCustomer.customer_phone && (
                   <span className="ml-4 text-gray-700">
-                    | SĐT: <b className="text-green-700">{customerPhone}</b>
+                    | SĐT: <b className="text-green-700">{selectedCustomer.customer_phone}</b>
                   </span>
                 )}
               </h3>
@@ -201,7 +203,6 @@ function CongNo() {
               className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded ml-3"
               onClick={() => {
                 setSelectedCustomer(null);
-                setCustomerPhone("");
                 setCustomerDebt({ total_debt: 0, total_paid: 0, debt_history: [] });
               }}
             >
@@ -319,7 +320,6 @@ function CongNo() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
