@@ -32,7 +32,7 @@ function XuatHang() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xuat-hang-list`);
       const data = await res.json();
-      setSales(data.items || []);
+      setSales(Array.isArray(data.items) ? data.items : []);
     } catch (err) {
       setSales([]);
     }
@@ -51,7 +51,6 @@ function XuatHang() {
           .includes(lowerQuery) ||
         (item.sku || "").toLowerCase().includes(lowerQuery)
     );
-
     // Gom nhóm: Nếu có IMEI thì nhóm như cũ, nếu không có IMEI thì cộng dồn số lượng (phụ kiện)
     const group = {};
     filtered.forEach(item => {
@@ -69,10 +68,9 @@ function XuatHang() {
         group[key].imeis.push(item.imei);
       } else {
         // Nếu là phụ kiện (không IMEI), cộng số lượng tồn kho
-        group[key].soLuong += Number(item.so_luong || item.quantity || 1); // Sửa tên field đúng với backend!
+        group[key].soLuong += Number(item.so_luong || item.quantity || 1);
       }
     });
-
     setSuggestList(Object.values(group));
     setShowSuggest(true);
   };
@@ -121,7 +119,7 @@ function XuatHang() {
   // Nếu nhiều IMEI thì chọn tiếp
   const handleSelectImei = (imei) => {
     setFormData(prev => ({ ...prev, imei }));
-    setSelectImeis([]); // ẩn chọn IMEI sau khi chọn
+    setSelectImeis([]);
   };
 
   const handleChange = (e) => {
@@ -152,8 +150,8 @@ function XuatHang() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ " + data.message);
-        setProfit(data.profit);
+        setMessage("✅ " + (data.message || "Thành công!"));
+        setProfit(data.profit || null);
         setFormData({
           imei: "",
           sold_date: "",
@@ -165,10 +163,10 @@ function XuatHang() {
           note: "",
         });
         setEditingId(null);
-        setSelectImeis([]);  // <-- RESET khi xong cập nhật
-        fetchSales();        // <-- Load lại danh sách đơn xuất
+        setSelectImeis([]);
+        fetchSales(); // REFRESH bảng không reload trang!
       } else {
-        setMessage("❌ " + data.message);
+        setMessage("❌ " + (data.message || "Cập nhật thất bại"));
       }
     } catch (err) {
       setMessage("❌ Lỗi kết nối tới server");
@@ -356,7 +354,7 @@ function XuatHang() {
 
       {profit !== null && (
         <p className="mt-2 text-center text-green-600 font-semibold">
-          💰 Lợi nhuận: {profit.toLocaleString()}đ
+          💰 Lợi nhuận: {Number(profit).toLocaleString()}đ
         </p>
       )}
 
@@ -404,20 +402,27 @@ function XuatHang() {
           <tbody>
             {filteredSales.map((item) => (
               <tr key={item._id}>
-                <td className="border p-2">{item.imei}</td>
-                <td className="border p-2">{item.sku}</td>
-                <td className="border p-2">{item.product_name}</td>
-                <td className="border p-2 text-center">{item.price_sell?.toLocaleString()}đ</td>
-                <td className="border p-2">{item.sold_date?.slice(0, 10)}</td>
-                <td className="border p-2">{item.customer_name}</td>
-                <td className="border p-2">{item.warranty}</td>
-                <td className="border p-2">{item.note}</td>
+                <td className="border p-2">{item.imei || ""}</td>
+                <td className="border p-2">{item.sku || ""}</td>
+                <td className="border p-2">{item.product_name || ""}</td>
+                <td className="border p-2 text-center">{item.price_sell ? Number(item.price_sell).toLocaleString() : ""}đ</td>
+                <td className="border p-2">{item.sold_date ? item.sold_date.slice(0, 10) : ""}</td>
+                <td className="border p-2">{item.customer_name || ""}</td>
+                <td className="border p-2">{item.warranty || ""}</td>
+                <td className="border p-2">{item.note || ""}</td>
                 <td className="border p-2 text-center space-x-1">
                   <button onClick={() => handleEdit(item)} className="bg-yellow-400 text-white px-2 py-1 rounded">✏️</button>
                   <button onClick={() => handleDelete(item._id)} className="bg-red-600 text-white px-2 py-1 rounded">🗑️</button>
                 </td>
               </tr>
             ))}
+            {filteredSales.length === 0 && (
+              <tr>
+                <td colSpan="9" className="text-center py-4 text-gray-500">
+                  Không có đơn xuất nào.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
