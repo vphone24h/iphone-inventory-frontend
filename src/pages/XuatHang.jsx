@@ -39,16 +39,16 @@ function XuatHang() {
     if (!query || query.length < 2) return setSuggestList([]);
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`);
     const data = await res.json();
-    // Lọc các sản phẩm có tên gần đúng
     const lowerQuery = query.trim().toLowerCase();
     const filtered = (data.items || []).filter(
       item =>
         (item.product_name || item.tenSanPham || "")
           .toLowerCase()
-          .includes(lowerQuery)
+          .includes(lowerQuery) ||
+        (item.sku || "").toLowerCase().includes(lowerQuery)
     );
 
-    // Gom nhóm theo tên + sku, tổng số lượng tồn kho, list IMEI
+    // Gom nhóm: Nếu có IMEI thì nhóm như cũ, nếu không có IMEI thì cộng dồn số lượng (phụ kiện)
     const group = {};
     filtered.forEach(item => {
       const key = (item.product_name || item.tenSanPham || "Không rõ") + "_" + (item.sku || "Không rõ");
@@ -57,10 +57,18 @@ function XuatHang() {
           name: item.product_name || item.tenSanPham || "Không rõ",
           sku: item.sku || "",
           imeis: [],
+          soLuong: 0, // cho phụ kiện
+          isAccessory: !item.imei // true nếu không có imei
         };
       }
-      if (item.imei) group[key].imeis.push(item.imei);
+      if (item.imei) {
+        group[key].imeis.push(item.imei);
+      } else {
+        // Nếu là phụ kiện (không IMEI), cộng số lượng tồn kho
+        group[key].soLuong += Number(item.so_luong || item.quantity || 1); // Sửa tên field đúng với backend!
+      }
     });
+
     setSuggestList(Object.values(group));
     setShowSuggest(true);
   };
@@ -100,10 +108,10 @@ function XuatHang() {
       ...prev,
       product_name: item.name,
       sku: item.sku,
-      imei: item.imeis.length === 1 ? item.imeis[0] : "",
+      imei: item.isAccessory ? "" : (item.imeis.length === 1 ? item.imeis[0] : ""),
     }));
     setShowSuggest(false);
-    setSelectImeis(item.imeis.length > 1 ? item.imeis : []);
+    setSelectImeis(item.isAccessory ? [] : (item.imeis.length > 1 ? item.imeis : []));
   };
 
   // Nếu nhiều IMEI thì chọn tiếp
@@ -253,7 +261,12 @@ function XuatHang() {
                   onClick={() => handleSelectSuggest(item)}
                 >
                   <span className="font-medium text-blue-600">{item.name}</span>
-                  <span className="text-xs text-gray-500">SKU: {item.sku} | SL còn: {item.imeis.length} | IMEI: {item.imeis.slice(0, 5).join(", ")}{item.imeis.length > 5 ? "..." : ""}</span>
+                  <span className="text-xs text-gray-500">
+                    SKU: {item.sku} | SL còn: {item.isAccessory ? item.soLuong : item.imeis.length}
+                    {item.isAccessory ? "" : (
+                      <> | IMEI: {item.imeis.slice(0, 5).join(", ")}{item.imeis.length > 5 ? "..." : ""}</>
+                    )}
+                  </span>
                 </div>
               ))}
             </div>
