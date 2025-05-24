@@ -19,7 +19,7 @@ function CongNo() {
     setDebts(data.items || []);
   };
 
-  // Chọn khách hàng để thao tác tổng (truyền cả object khách)
+  // Chọn khách hàng để thao tác tổng
   const handleSelectCustomer = (customer) => {
     setSelectedCustomer(customer);
     setCustomerDebt({
@@ -31,7 +31,7 @@ function CongNo() {
     setAddAmount(""); setAddNote("");
   };
 
-  // Trừ nợ tổng cho khách (gửi cả customer_name & customer_phone & note)
+  // Trừ nợ tổng cho khách (có ghi chú)
   const handlePayDebt = async () => {
     if (!payAmount || isNaN(payAmount)) return alert("Nhập số tiền muốn trả");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-pay-customer`, {
@@ -60,7 +60,7 @@ function CongNo() {
     }
   };
 
-  // Cộng thêm nợ tổng cho khách (gửi cả customer_name & customer_phone & note)
+  // Cộng thêm nợ tổng cho khách (có ghi chú)
   const handleAddDebt = async () => {
     if (!addAmount || isNaN(addAmount)) return alert("Nhập số tiền muốn cộng nợ");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-add-customer`, {
