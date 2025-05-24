@@ -8,6 +8,7 @@ import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
 import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
 import PrivateRoute from "./components/PrivateRoute";
+import CongNo from "./pages/CongNo"; // <-- Thêm dòng này
 
 function App() {
   return (
@@ -52,6 +53,14 @@ function App() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/cong-no"
+        element={
+          <PrivateRoute>
+            <CongNo />
+          </PrivateRoute>
+        }
+      /> {/* <-- Thêm route này */}
     </Routes>
   );
 }
