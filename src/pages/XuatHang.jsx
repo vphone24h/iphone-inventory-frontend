@@ -23,6 +23,10 @@ function XuatHang() {
   const [showSuggest, setShowSuggest] = useState(false);
   const [selectImeis, setSelectImeis] = useState([]);
 
+  // --- Thêm cho filter/tìm kiếm ---
+  const [searchText, setSearchText] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+
   // Lấy danh sách đơn xuất
   const fetchSales = async () => {
     try {
@@ -197,6 +201,21 @@ function XuatHang() {
 
   const inputClass = "w-full border p-2 rounded h-10";
 
+  // --- Phần lọc/tìm kiếm/sắp xếp ---
+  const filteredSales = sales
+    .filter(item => {
+      const text = (item.imei || "") + " " + (item.product_name || "") + " " + (item.sku || "");
+      const searchOK = searchText === "" || text.toLowerCase().includes(searchText.toLowerCase());
+      const dateOK = filterDate === "" || (item.sold_date && item.sold_date.slice(0, 10) === filterDate);
+      return searchOK && dateOK;
+    })
+    .sort((a, b) => {
+      // Sắp xếp mới nhất lên trên
+      const dateA = new Date(a.sold_date || "");
+      const dateB = new Date(b.sold_date || "");
+      return dateB - dateA;
+    });
+
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
       {/* Đăng xuất */}
@@ -341,8 +360,32 @@ function XuatHang() {
         </p>
       )}
 
+      {/* THANH TÌM KIẾM & LỌC NGÀY */}
+      <div className="flex gap-3 mb-4 mt-10">
+        <input
+          type="text"
+          placeholder="🔎 Tìm kiếm IMEI, tên, SKU..."
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
+          className="border rounded px-3 py-2 flex-1"
+        />
+        <input
+          type="date"
+          value={filterDate}
+          onChange={e => setFilterDate(e.target.value)}
+          className="border rounded px-3 py-2"
+        />
+        {filterDate && (
+          <button
+            type="button"
+            onClick={() => setFilterDate("")}
+            className="ml-1 text-xs text-red-500 underline"
+          >Xoá lọc ngày</button>
+        )}
+      </div>
+
       {/* DANH SÁCH ĐƠN XUẤT */}
-      <div className="mt-10">
+      <div>
         <h3 className="text-lg font-bold mb-2">Danh sách đơn xuất hàng</h3>
         <table className="w-full border text-sm">
           <thead>
@@ -359,7 +402,7 @@ function XuatHang() {
             </tr>
           </thead>
           <tbody>
-            {sales.map((item) => (
+            {filteredSales.map((item) => (
               <tr key={item._id}>
                 <td className="border p-2">{item.imei}</td>
                 <td className="border p-2">{item.sku}</td>
