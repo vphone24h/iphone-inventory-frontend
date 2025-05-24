@@ -9,6 +9,7 @@ function CongNo() {
   const [payAmount, setPayAmount] = useState("");
   const [addAmount, setAddAmount] = useState("");
   const [historyModal, setHistoryModal] = useState({ open: false, history: [] });
+  const [detailModal, setDetailModal] = useState({ open: false, orders: [] });
 
   // Lấy danh sách khách hàng còn nợ
   const fetchDebts = async () => {
@@ -89,6 +90,13 @@ function CongNo() {
     setHistoryModal({ open: true, history: history || [] });
   };
 
+  // Xem chi tiết sản phẩm khách đã mua
+  const handleShowDetail = async (customer_name) => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-orders?customer_name=${encodeURIComponent(customer_name)}`);
+    const data = await res.json();
+    setDetailModal({ open: true, orders: data.orders || [] });
+  };
+
   useEffect(() => {
     fetchDebts();
   }, []);
@@ -123,6 +131,7 @@ function CongNo() {
                 <th className="border p-2">Còn nợ</th>
                 <th className="border p-2">Thao tác</th>
                 <th className="border p-2">Lịch sử</th>
+                <th className="border p-2">Xem chi tiết</th>
               </tr>
             </thead>
             <tbody>
@@ -148,11 +157,19 @@ function CongNo() {
                       Xem
                     </button>
                   </td>
+                  <td className="border p-2 text-center">
+                    <button
+                      className="bg-yellow-400 text-black px-2 py-1 rounded"
+                      onClick={() => handleShowDetail(debt.customer_name)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </td>
                 </tr>
               ))}
               {debts.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-3 text-gray-500">
+                  <td colSpan={7} className="text-center py-3 text-gray-500">
                     Không có công nợ nào!
                   </td>
                 </tr>
@@ -261,6 +278,48 @@ function CongNo() {
           </div>
         </div>
       )}
+
+      {/* Modal chi tiết sản phẩm khách đã mua */}
+      {detailModal.open && (
+        <div className="fixed z-50 inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto relative">
+            <button
+              className="absolute top-2 right-2 text-lg"
+              onClick={() => setDetailModal({ open: false, orders: [] })}
+            >✖</button>
+            <h3 className="text-lg font-bold mb-3">Danh sách sản phẩm khách đã mua</h3>
+            <table className="w-full border text-sm mb-2">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2">IMEI</th>
+                  <th className="border p-2">Sản phẩm</th>
+                  <th className="border p-2">Giá bán</th>
+                  <th className="border p-2">Ngày bán</th>
+                </tr>
+              </thead>
+              <tbody>
+                {detailModal.orders.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-3 text-gray-500">
+                      Không có sản phẩm nào!
+                    </td>
+                  </tr>
+                ) : (
+                  detailModal.orders.map((order, idx) => (
+                    <tr key={idx}>
+                      <td className="border p-2">{order.imei}</td>
+                      <td className="border p-2">{order.product_name}</td>
+                      <td className="border p-2 text-right">{Number(order.price_sell).toLocaleString()}đ</td>
+                      <td className="border p-2">{order.sold_date?.slice(0,10)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
