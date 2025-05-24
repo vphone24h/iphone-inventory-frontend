@@ -11,6 +11,7 @@ function XuatHang() {
     customer_name: "",
     warranty: "",
     note: "",
+    debt: "",            // <--- Thêm trường công nợ
   });
 
   const [message, setMessage] = useState("");
@@ -60,14 +61,13 @@ function XuatHang() {
           name: item.product_name || item.tenSanPham || "Không rõ",
           sku: item.sku || "",
           imeis: [],
-          soLuong: 0, // cho phụ kiện
-          isAccessory: !item.imei // true nếu không có imei
+          soLuong: 0,
+          isAccessory: !item.imei
         };
       }
       if (item.imei) {
         group[key].imeis.push(item.imei);
       } else {
-        // Nếu là phụ kiện (không IMEI), cộng số lượng tồn kho
         group[key].soLuong += Number(item.so_luong || item.quantity || 1);
       }
     });
@@ -161,10 +161,11 @@ function XuatHang() {
           customer_name: "",
           warranty: "",
           note: "",
+          debt: "",
         });
         setEditingId(null);
         setSelectImeis([]);
-        fetchSales(); // REFRESH bảng không reload trang!
+        fetchSales();
       } else {
         setMessage("❌ " + (data.message || "Cập nhật thất bại"));
       }
@@ -184,6 +185,7 @@ function XuatHang() {
       customer_name: item.customer_name || "",
       warranty: item.warranty || "",
       note: item.note || "",
+      debt: item.debt || "",         // <--- Bổ sung khi sửa
     });
     setEditingId(item._id);
     setMessage("");
@@ -340,6 +342,17 @@ function XuatHang() {
           onChange={handleChange}
           className={inputClass}
         />
+        {/* Thêm trường Công nợ */}
+        <input
+          type="number"
+          name="debt"
+          placeholder="Công nợ (nếu có)"
+          value={formData.debt}
+          onChange={handleChange}
+          className={inputClass}
+          min="0"
+        />
+
         <button
           type="submit"
           className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 font-semibold"
@@ -396,6 +409,7 @@ function XuatHang() {
               <th className="border p-2">Khách hàng</th>
               <th className="border p-2">Bảo hành</th>
               <th className="border p-2">Ghi chú</th>
+              <th className="border p-2">Công nợ</th>
               <th className="border p-2 text-center">Thao tác</th>
             </tr>
           </thead>
@@ -410,6 +424,7 @@ function XuatHang() {
                 <td className="border p-2">{item.customer_name || ""}</td>
                 <td className="border p-2">{item.warranty || ""}</td>
                 <td className="border p-2">{item.note || ""}</td>
+                <td className="border p-2 text-center">{item.debt ? Number(item.debt).toLocaleString() : ""}</td>
                 <td className="border p-2 text-center space-x-1">
                   <button onClick={() => handleEdit(item)} className="bg-yellow-400 text-white px-2 py-1 rounded">✏️</button>
                   <button onClick={() => handleDelete(item._id)} className="bg-red-600 text-white px-2 py-1 rounded">🗑️</button>
@@ -418,7 +433,7 @@ function XuatHang() {
             ))}
             {filteredSales.length === 0 && (
               <tr>
-                <td colSpan="9" className="text-center py-4 text-gray-500">
+                <td colSpan="10" className="text-center py-4 text-gray-500">
                   Không có đơn xuất nào.
                 </td>
               </tr>
