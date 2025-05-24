@@ -6,7 +6,8 @@ function ChiTietDonHang({ from, to, branch }) {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const url = new URL("http://localhost:4000/api/bao-cao-don-hang-chi-tiet");
+        // Lấy URL động theo biến môi trường (không hardcode localhost)
+        const url = new URL(`${import.meta.env.VITE_API_URL}/api/bao-cao-don-hang-chi-tiet`);
         if (from && to) {
           url.searchParams.append("from", from);
           url.searchParams.append("to", to);
@@ -20,6 +21,7 @@ function ChiTietDonHang({ from, to, branch }) {
         setOrders(data.orders || []);
       } catch (err) {
         console.error("Lỗi khi tải đơn hàng:", err);
+        setOrders([]); // clear list nếu lỗi
       }
     };
 
@@ -43,16 +45,20 @@ function ChiTietDonHang({ from, to, branch }) {
           </thead>
           <tbody>
             {orders.map((item, index) => (
-              <tr key={index} className="border-t hover:bg-gray-50">
+              <tr key={item._id || index} className="border-t hover:bg-gray-50">
                 <td className="border px-4 py-2">{item.sku}</td>
                 <td className="border px-4 py-2">
-                  {new Date(item.sold_date).toLocaleString("vi-VN")}
+                  {item.sold_date ? new Date(item.sold_date).toLocaleString("vi-VN") : ""}
                 </td>
-                <td className="border px-4 py-2">{item.customer || "Khách lẻ"}</td>
-                <td className="border px-4 py-2">{item.price_import?.toLocaleString()} đ</td>
-                <td className="border px-4 py-2">{item.price_sell?.toLocaleString()} đ</td>
+                <td className="border px-4 py-2">{item.customer_name || item.customer || "Khách lẻ"}</td>
+                <td className="border px-4 py-2">
+                  {(item.giaNhap || item.price_import || 0).toLocaleString()} đ
+                </td>
+                <td className="border px-4 py-2">
+                  {(item.giaBan || item.price_sell || 0).toLocaleString()} đ
+                </td>
                 <td className="border px-4 py-2 text-green-600 font-semibold">
-                  {(item.price_sell - item.price_import).toLocaleString()} đ
+                  {((item.giaBan || item.price_sell || 0) - (item.giaNhap || item.price_import || 0)).toLocaleString()} đ
                 </td>
               </tr>
             ))}
