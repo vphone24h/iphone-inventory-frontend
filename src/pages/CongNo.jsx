@@ -19,7 +19,7 @@ function CongNo() {
     setDebts(data.items || []);
   };
 
-  // Chọn khách hàng để thao tác tổng
+  // Chọn khách hàng để thao tác tổng (truyền cả object khách)
   const handleSelectCustomer = (customer) => {
     setSelectedCustomer(customer);
     setCustomerDebt({
@@ -48,13 +48,22 @@ function CongNo() {
     if (res.ok) {
       alert("✅ Đã cập nhật công nợ!");
       setPayAmount(""); setPayNote("");
-      fetchDebts();
-      setCustomerDebt({
-        ...customerDebt,
-        total_debt: data.total_debt,
-        total_paid: data.total_paid,
-        debt_history: data.debt_history
-      });
+      await fetchDebts(); // Cập nhật lại debts từ backend
+      // Sau khi fetch xong, tìm đúng khách vừa update để set lại customerDebt mới nhất
+      setTimeout(() => {
+        // Đảm bảo lấy đúng bản mới nhất vừa fetch
+        const updated = debts.find(d =>
+          d.customer_name === selectedCustomer.customer_name &&
+          d.customer_phone === selectedCustomer.customer_phone
+        );
+        if (updated) {
+          setCustomerDebt({
+            total_debt: updated.total_debt,
+            total_paid: updated.total_paid,
+            debt_history: updated.debt_history || []
+          });
+        }
+      }, 200); // nhỏ delay nhẹ để state debts cập nhật
     } else {
       alert("❌ " + (data.message || "Cập nhật công nợ thất bại!"));
     }
@@ -77,21 +86,28 @@ function CongNo() {
     if (res.ok) {
       alert("✅ Đã cộng thêm nợ!");
       setAddAmount(""); setAddNote("");
-      fetchDebts();
-      setCustomerDebt({
-        ...customerDebt,
-        total_debt: data.total_debt,
-        total_paid: data.total_paid,
-        debt_history: data.debt_history
-      });
+      await fetchDebts();
+      setTimeout(() => {
+        const updated = debts.find(d =>
+          d.customer_name === selectedCustomer.customer_name &&
+          d.customer_phone === selectedCustomer.customer_phone
+        );
+        if (updated) {
+          setCustomerDebt({
+            total_debt: updated.total_debt,
+            total_paid: updated.total_paid,
+            debt_history: updated.debt_history || []
+          });
+        }
+      }, 200);
     } else {
       alert("❌ " + (data.message || "Cộng nợ thất bại!"));
     }
   };
 
-  // Lịch sử trả/cộng nợ
-  const handleShowHistory = (history) => {
-    setHistoryModal({ open: true, history: history || [] });
+  // Lịch sử trả/cộng nợ: lấy từ state customerDebt (đã được cập nhật mới nhất ở trên)
+  const handleShowHistory = () => {
+    setHistoryModal({ open: true, history: customerDebt.debt_history || [] });
   };
 
   // Xem chi tiết sản phẩm khách đã mua
@@ -158,7 +174,7 @@ function CongNo() {
                   <td className="border p-2 text-center">
                     <button
                       className="bg-gray-300 text-black px-2 py-1 rounded"
-                      onClick={() => handleShowHistory(debt.debt_history)}
+                      onClick={handleShowHistory}
                     >
                       Xem
                     </button>
@@ -264,7 +280,7 @@ function CongNo() {
             <div>
               <button
                 className="bg-gray-300 text-black px-3 py-1 rounded"
-                onClick={() => handleShowHistory(customerDebt.debt_history)}
+                onClick={handleShowHistory}
               >
                 Xem lịch sử
               </button>
