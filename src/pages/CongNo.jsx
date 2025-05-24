@@ -80,50 +80,73 @@ function CongNo() {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow mt-10">
-      <div className="absolute top-4 right-4">
+    <div className="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
+      {/* Nút logout + quay lại xuất hàng trên cùng bên phải */}
+      <div className="absolute top-4 right-4 flex gap-2">
         <LogoutButton />
+        <button
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded"
+          onClick={() => window.location.href = "/xuat-hang"}
+        >
+          ← Quay lại Xuất hàng
+        </button>
       </div>
+
       <h2 className="text-2xl font-bold mb-4 text-center text-purple-700">
         Công nợ khách hàng
       </h2>
 
-      <div className="mb-6">
-        <h3 className="font-semibold mb-2">Danh sách khách còn công nợ:</h3>
-        <table className="w-full border text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">Khách hàng</th>
-              <th className="border p-2">Số tiền nợ</th>
-              <th className="border p-2">Xem chi tiết</th>
-            </tr>
-          </thead>
-          <tbody>
-            {debts.map((debt, i) => (
-              <tr key={i}>
-                <td className="border p-2">{debt.customer_name}</td>
-                <td className="border p-2 text-right text-red-600 font-bold">{Number(debt.total_debt).toLocaleString()}đ</td>
-                <td className="border p-2 text-center">
-                  <button
-                    className="bg-blue-600 text-white px-2 py-1 rounded"
-                    onClick={() => handleSelectCustomer(debt.customer_name)}
-                  >
-                    Xem
-                  </button>
-                </td>
+      {/* Danh sách khách còn công nợ */}
+      {!selectedCustomer && (
+        <div className="mb-6">
+          <h3 className="font-semibold mb-2">Danh sách khách còn công nợ:</h3>
+          <table className="w-full border text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border p-2">Khách hàng</th>
+                <th className="border p-2">SĐT</th>
+                <th className="border p-2">Số tiền nợ</th>
+                <th className="border p-2">Thao tác</th>
+                <th className="border p-2">Lịch sử</th>
               </tr>
-            ))}
-            {debts.length === 0 && (
-              <tr>
-                <td colSpan={3} className="text-center py-3 text-gray-500">
-                  Không có công nợ nào!
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {debts.map((debt, i) => (
+                <tr key={i}>
+                  <td className="border p-2">{debt.customer_name}</td>
+                  <td className="border p-2">{debt.customer_phone || "—"}</td>
+                  <td className="border p-2 text-right text-red-600 font-bold">{Number(debt.total_debt).toLocaleString()}đ</td>
+                  <td className="border p-2 text-center">
+                    <button
+                      className="bg-blue-600 text-white px-2 py-1 rounded"
+                      onClick={() => handleSelectCustomer(debt.customer_name)}
+                    >
+                      Xem
+                    </button>
+                  </td>
+                  <td className="border p-2 text-center">
+                    <button
+                      className="bg-gray-300 text-black px-2 py-1 rounded"
+                      onClick={() => handleShowHistory(debt.debt_history)}
+                    >
+                      Xem
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {debts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center py-3 text-gray-500">
+                    Không có công nợ nào!
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
+      {/* Chi tiết từng khách hàng */}
       {selectedCustomer && (
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
@@ -137,24 +160,18 @@ function CongNo() {
                 )}
               </h3>
             </div>
-            {/* Nút quay lại Xuất hàng */}
+            {/* Nút quay lại danh sách nợ */}
             <button
               className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded ml-3"
-              onClick={() => window.location.href = "/xuat-hang"}
+              onClick={() => {
+                setSelectedCustomer(null);
+                setOrders([]);
+                setCustomerPhone("");
+              }}
             >
-              ← Quay lại Xuất hàng
+              ← Quay lại danh sách nợ
             </button>
           </div>
-          <button
-            className="mb-2 text-sm text-gray-500 underline"
-            onClick={() => {
-              setSelectedCustomer(null);
-              setOrders([]);
-              setCustomerPhone("");
-            }}
-          >
-            ← Quay lại danh sách nợ
-          </button>
           <table className="w-full border text-sm">
             <thead>
               <tr className="bg-gray-100">
