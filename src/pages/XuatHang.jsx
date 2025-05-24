@@ -11,7 +11,7 @@ function XuatHang() {
     customer_name: "",
     warranty: "",
     note: "",
-    debt: "",            // <--- Thêm trường công nợ
+    debt: "",   // <--- Trường công nợ
   });
 
   const [message, setMessage] = useState("");
@@ -161,7 +161,7 @@ function XuatHang() {
           customer_name: "",
           warranty: "",
           note: "",
-          debt: "",
+          debt: "",   // reset công nợ
         });
         setEditingId(null);
         setSelectImeis([]);
@@ -185,7 +185,7 @@ function XuatHang() {
       customer_name: item.customer_name || "",
       warranty: item.warranty || "",
       note: item.note || "",
-      debt: item.debt || "",         // <--- Bổ sung khi sửa
+      debt: item.debt || "",   // sửa công nợ
     });
     setEditingId(item._id);
     setMessage("");
@@ -230,6 +230,7 @@ function XuatHang() {
         <button onClick={() => (window.location.href = "/xuat-hang")} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">📤 Xuất hàng</button>
         <button onClick={() => (window.location.href = "/ton-kho-so-luong")} className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">📦 Tồn kho</button>
         <button onClick={() => (window.location.href = "/bao-cao")} className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">📋 Báo cáo</button>
+        <button onClick={() => (window.location.href = "/cong-no")} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">💸 Công nợ</button>
       </div>
 
       <h2 className="text-2xl font-bold mb-6 text-center text-red-600">
