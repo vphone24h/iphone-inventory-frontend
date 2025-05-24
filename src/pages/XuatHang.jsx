@@ -165,7 +165,8 @@ function XuatHang() {
           note: "",
         });
         setEditingId(null);
-        fetchSales();
+        setSelectImeis([]);  // <-- RESET khi xong cập nhật
+        fetchSales();        // <-- Load lại danh sách đơn xuất
       } else {
         setMessage("❌ " + data.message);
       }
@@ -243,7 +244,6 @@ function XuatHang() {
           value={formData.imei}
           onChange={handleImeiChange}
           className={inputClass}
-          // KHÔNG required
         />
         <input
           type="date"
