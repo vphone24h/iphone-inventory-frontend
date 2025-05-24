@@ -108,11 +108,11 @@ function NhapHang() {
           price_import: "",
           import_date: "",
           supplier: "",
-          branch: formData.branch,       // Giữ lại branch
+          branch: formData.branch,
           note: "",
           tenSanPham: "",
           quantity: "",
-          category: formData.category    // Giữ lại category
+          category: formData.category
         });
         setEditingItemId(null);
         fetchItems();
