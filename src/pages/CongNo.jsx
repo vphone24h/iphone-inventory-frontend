@@ -3,10 +3,12 @@ import LogoutButton from "../components/LogoutButton";
 
 function CongNo() {
   const [debts, setDebts] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null); // {customer_name, customer_phone, ...}
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerDebt, setCustomerDebt] = useState({ total_debt: 0, total_paid: 0, debt_history: [] });
   const [payAmount, setPayAmount] = useState("");
+  const [payNote, setPayNote] = useState("");           // Ghi chú trả nợ
   const [addAmount, setAddAmount] = useState("");
+  const [addNote, setAddNote] = useState("");           // Ghi chú cộng nợ
   const [historyModal, setHistoryModal] = useState({ open: false, history: [] });
   const [detailModal, setDetailModal] = useState({ open: false, orders: [] });
 
@@ -19,17 +21,17 @@ function CongNo() {
 
   // Chọn khách hàng để thao tác tổng (truyền cả object khách)
   const handleSelectCustomer = (customer) => {
-    setSelectedCustomer(customer); // lưu nguyên object {customer_name, customer_phone,...}
+    setSelectedCustomer(customer);
     setCustomerDebt({
       total_debt: customer.total_debt || 0,
       total_paid: customer.total_paid || 0,
       debt_history: customer.debt_history || []
     });
-    setPayAmount("");
-    setAddAmount("");
+    setPayAmount(""); setPayNote("");
+    setAddAmount(""); setAddNote("");
   };
 
-  // Trừ nợ tổng cho khách (truyền cả customer_name & customer_phone)
+  // Trừ nợ tổng cho khách (gửi cả customer_name & customer_phone & note)
   const handlePayDebt = async () => {
     if (!payAmount || isNaN(payAmount)) return alert("Nhập số tiền muốn trả");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-pay-customer`, {
@@ -38,13 +40,14 @@ function CongNo() {
       body: JSON.stringify({
         customer_name: selectedCustomer.customer_name,
         customer_phone: selectedCustomer.customer_phone,
-        amount: payAmount
+        amount: payAmount,
+        note: payNote
       }),
     });
     const data = await res.json();
     if (res.ok) {
       alert("✅ Đã cập nhật công nợ!");
-      setPayAmount("");
+      setPayAmount(""); setPayNote("");
       fetchDebts();
       setCustomerDebt({
         ...customerDebt,
@@ -57,7 +60,7 @@ function CongNo() {
     }
   };
 
-  // Cộng thêm nợ tổng cho khách (truyền cả customer_name & customer_phone)
+  // Cộng thêm nợ tổng cho khách (gửi cả customer_name & customer_phone & note)
   const handleAddDebt = async () => {
     if (!addAmount || isNaN(addAmount)) return alert("Nhập số tiền muốn cộng nợ");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cong-no/cong-no-add-customer`, {
@@ -66,13 +69,14 @@ function CongNo() {
       body: JSON.stringify({
         customer_name: selectedCustomer.customer_name,
         customer_phone: selectedCustomer.customer_phone,
-        amount: addAmount
+        amount: addAmount,
+        note: addNote
       }),
     });
     const data = await res.json();
     if (res.ok) {
       alert("✅ Đã cộng thêm nợ!");
-      setAddAmount("");
+      setAddAmount(""); setAddNote("");
       fetchDebts();
       setCustomerDebt({
         ...customerDebt,
@@ -105,7 +109,7 @@ function CongNo() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
-      {/* Nút logout + quay lại xuất hàng trên cùng bên phải */}
+      {/* Nút logout + quay lại xuất hàng */}
       <div className="absolute top-4 right-4 flex gap-2">
         <LogoutButton />
         <button
@@ -216,9 +220,16 @@ function CongNo() {
                 type="number"
                 min="0"
                 placeholder="Trả nợ"
-                className="border rounded px-2 py-1 w-32 mr-2"
+                className="border rounded px-2 py-1 w-24 mr-2"
                 value={payAmount}
                 onChange={e => setPayAmount(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Ghi chú trả nợ"
+                className="border rounded px-2 py-1 w-40 mr-2"
+                value={payNote}
+                onChange={e => setPayNote(e.target.value)}
               />
               <button
                 className="bg-green-600 text-white px-3 py-1 rounded"
@@ -232,9 +243,16 @@ function CongNo() {
                 type="number"
                 min="0"
                 placeholder="Cộng nợ"
-                className="border rounded px-2 py-1 w-32 mr-2"
+                className="border rounded px-2 py-1 w-24 mr-2"
                 value={addAmount}
                 onChange={e => setAddAmount(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Ghi chú cộng nợ"
+                className="border rounded px-2 py-1 w-40 mr-2"
+                value={addNote}
+                onChange={e => setAddNote(e.target.value)}
               />
               <button
                 className="bg-red-500 text-white px-3 py-1 rounded"
@@ -270,6 +288,7 @@ function CongNo() {
                   <li key={idx} className={`p-2 rounded ${item.type === "add" ? "bg-red-100" : "bg-green-100"}`}>
                     <b>{item.type === "add" ? "Cộng nợ" : "Trả nợ"}:</b> {Number(item.amount).toLocaleString()}đ
                     <span className="ml-2 text-xs text-gray-500">{item.date ? (item.date.slice(0, 10) + " " + item.date.slice(11, 19)) : ""}</span>
+                    {item.note && <div className="text-xs text-gray-700 italic mt-1">📝 {item.note}</div>}
                   </li>
                 ))
               ) : (
