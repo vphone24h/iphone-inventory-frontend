@@ -2,18 +2,61 @@ import { useEffect, useState } from "react";
 
 function AdminUserApprove() {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch("/api/pending-users")
-      .then(res => res.json())
-      .then(setUsers);
-  }, []);
+    const fetchPendingUsers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch("/api/pending-users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`Lỗi khi lấy danh sách: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        setUsers(data.users || data); // tùy backend trả data thế nào
+      } catch (err) {
+        setError(err.message || "Lỗi không xác định");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingUsers();
+  }, [token]);
 
   const handleApprove = async (id) => {
-    await fetch(`/api/approve-user/${id}`, { method: "POST" });
-    setUsers(users => users.filter(u => u._id !== id));
-    alert("Đã duyệt user!");
+    try {
+      const res = await fetch(`/api/approve-user/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Duyệt user lỗi: ${res.statusText}`);
+      }
+
+      setUsers((users) => users.filter((u) => u._id !== id));
+      alert("Đã duyệt user!");
+    } catch (err) {
+      alert(err.message || "Lỗi không xác định khi duyệt user");
+    }
   };
+
+  if (loading) return <div>Đang tải danh sách user...</div>;
+  if (error) return <div style={{ color: "red" }}>Lỗi: {error}</div>;
 
   return (
     <div style={{ padding: 30 }}>
@@ -26,7 +69,14 @@ function AdminUserApprove() {
           </tr>
         </thead>
         <tbody>
-          {users.map(u => (
+          {users.length === 0 && (
+            <tr>
+              <td colSpan={2} style={{ textAlign: "center" }}>
+                Không có user nào cần duyệt
+              </td>
+            </tr>
+          )}
+          {users.map((u) => (
             <tr key={u._id}>
               <td>{u.email}</td>
               <td>
@@ -39,4 +89,5 @@ function AdminUserApprove() {
     </div>
   );
 }
+
 export default AdminUserApprove;
