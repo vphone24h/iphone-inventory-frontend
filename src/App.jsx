@@ -8,7 +8,8 @@ import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
 import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
 import PrivateRoute from "./components/PrivateRoute";
-import CongNo from "./pages/CongNo"; // <-- Thêm dòng này
+import CongNo from "./pages/CongNo";
+import AdminXetDuyet from "./pages/AdminXetDuyet"; // Trang admin xét duyệt (tạo file này)
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
       <Route path="/quen-mat-khau" element={<QuenMatKhau />} />
       <Route path="/reset-mat-khau/:token" element={<ResetMatKhau />} />
 
-      {/* Private routes */}
+      {/* Private routes (bảo vệ chung, cho user đã đăng nhập) */}
       <Route
         path="/nhap-hang"
         element={
@@ -60,7 +61,17 @@ function App() {
             <CongNo />
           </PrivateRoute>
         }
-      /> {/* <-- Thêm route này */}
+      />
+
+      {/* Private route dành riêng cho admin xét duyệt (chỉ admin mới được vào) */}
+      <Route
+        path="/admin-xet-duyet"
+        element={
+          <PrivateRoute requiredRole="admin">
+            <AdminXetDuyet />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 }
