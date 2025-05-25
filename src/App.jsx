@@ -11,7 +11,7 @@ import BaoCao from "./BaoCao"; // Nếu BaoCao.jsx nằm ngoài thư mục pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
 import QuanLyUser from "./pages/QuanLyUser";
-// Nếu bạn chưa có trang NotAuthorized, tạo file ./pages/NotAuthorized.jsx
+import AdminDashboard from "./pages/AdminDashboard";  // <-- Bổ sung import
 import NotAuthorized from "./pages/NotAuthorized";
 
 function App() {
@@ -68,6 +68,15 @@ function App() {
       />
 
       {/* Admin only routes */}
+      <Route
+        path="/admin-dashboard"
+        element={
+          <PrivateRoute requiredRole="admin">
+            <AdminDashboard />
+          </PrivateRoute>
+        }
+      />
+
       <Route
         path="/quanlyuser"
         element={

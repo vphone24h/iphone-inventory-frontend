@@ -23,7 +23,7 @@ function AdminLogin() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         setMessage("");
-        navigate("/admin-dashboard"); // Thay bằng trang admin dashboard của bạn
+        navigate("/admin-dashboard"); // Bạn nhớ tạo route /admin-dashboard tương ứng trong App.jsx
       } else {
         setMessage(data.message || "Đăng nhập thất bại");
       }
@@ -45,6 +45,7 @@ function AdminLogin() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          autoFocus
         />
         <input
           type="password"
@@ -71,6 +72,7 @@ function AdminLogin() {
         <button
           onClick={() => navigate("/login")}
           className="text-blue-500 hover:underline"
+          type="button"
         >
           Đăng nhập tại đây
         </button>
