@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode"; // Nên import để decode token kiểm tra role
 
 function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -23,7 +24,20 @@ function AdminLogin() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         setMessage("");
-        navigate("/admin-dashboard"); // Bạn nhớ tạo route /admin-dashboard tương ứng trong App.jsx
+
+        // Giải mã token để kiểm tra role trước khi điều hướng
+        try {
+          const decoded = jwt_decode(data.token);
+          if (decoded.role === "admin") {
+            navigate("/admin-dashboard"); // Đường dẫn admin dashboard
+          } else {
+            setMessage("❌ Tài khoản không phải admin");
+            localStorage.removeItem("token");
+          }
+        } catch {
+          setMessage("❌ Token không hợp lệ");
+          localStorage.removeItem("token");
+        }
       } else {
         setMessage(data.message || "Đăng nhập thất bại");
       }
@@ -37,7 +51,7 @@ function AdminLogin() {
     <div className="max-w-md mx-auto mt-20 p-6 shadow rounded bg-white text-center">
       <h1 className="text-2xl font-bold mb-6">🔐 Đăng nhập Admin</h1>
 
-      <form onSubmit={handleLogin} className="flex flex-col gap-4">
+      <form onSubmit={handleLogin} className="flex flex-col gap-4" autoComplete="off">
         <input
           type="email"
           placeholder="Email Admin"
@@ -46,6 +60,7 @@ function AdminLogin() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoFocus
+          autoComplete="username"
         />
         <input
           type="password"
@@ -54,6 +69,7 @@ function AdminLogin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          autoComplete="current-password"
         />
         <button
           type="submit"

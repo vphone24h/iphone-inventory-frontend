@@ -1,7 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-// Sửa import jwt_decode đúng chuẩn esm
-import * as jwt_decode from "jwt-decode";
+import jwt_decode from "jwt-decode";  // dùng import bình thường
 
 function PrivateRoute({ children, requiredRole }) {
   const token = localStorage.getItem("token");
@@ -12,8 +11,8 @@ function PrivateRoute({ children, requiredRole }) {
   }
 
   try {
-    // Dùng jwt_decode.default để decode token
-    const decoded = jwt_decode.default(token);
+    // Giải mã token
+    const decoded = jwt_decode(token);
 
     // Nếu có requiredRole và role không khớp => chuyển về not authorized
     if (requiredRole && decoded.role !== requiredRole) {
