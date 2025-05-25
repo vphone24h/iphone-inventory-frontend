@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import jwt_decode from "jwt-decode";
+// Sửa import jwt_decode đúng chuẩn esm
+import * as jwt_decode from "jwt-decode";
 
 function PrivateRoute({ children, requiredRole }) {
   const token = localStorage.getItem("token");
@@ -10,7 +11,8 @@ function PrivateRoute({ children, requiredRole }) {
   }
 
   try {
-    const decoded = jwt_decode(token);
+    // Dùng jwt_decode.default để decode token
+    const decoded = jwt_decode.default(token);
 
     if (requiredRole && decoded.role !== requiredRole) {
       return <Navigate to="/not-authorized" replace />;

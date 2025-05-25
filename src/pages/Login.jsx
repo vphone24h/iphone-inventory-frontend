@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import * as jwt_decode from "jwt-decode";  // Sửa import jwt-decode đúng cách
+import * as jwt_decode from "jwt-decode";  // Import đúng cách theo esm
 
 function Login() {
   const [email, setEmail] = useState("");
