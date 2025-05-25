@@ -10,7 +10,6 @@ import TonKhoSoLuong from "./pages/TonKhoSoLuong";
 import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
-import AdminUserApprove from "./pages/AdminUserApprove"; // Đổi tên đúng với file và component
 import QuanLyUser from "./pages/QuanLyUser"; // Bổ sung import trang quản lý user
 import NotAuthorized from "./pages/NotAuthorized"; // Nếu chưa có, bạn tạo trang này
 
@@ -63,16 +62,6 @@ function App() {
         element={
           <PrivateRoute>
             <CongNo />
-          </PrivateRoute>
-        }
-      />
-
-      {/* Private route dành riêng cho admin xét duyệt (chỉ admin mới được vào) */}
-      <Route
-        path="/admin-xet-duyet"
-        element={
-          <PrivateRoute requiredRole="admin">
-            <AdminUserApprove />
           </PrivateRoute>
         }
       />
