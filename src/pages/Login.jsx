@@ -31,7 +31,7 @@ function Login() {
         alert("✅ Đăng nhập thành công");
         localStorage.setItem("token", data.token);
 
-        const decoded = jwt_decode.default(data.token);
+       const decoded = jwt_decode(data.token);
 
         navigate("/nhap-hang");
       } else {

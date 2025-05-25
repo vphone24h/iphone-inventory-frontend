@@ -1,27 +1,38 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-// Sửa import jwt_decode đúng chuẩn esm
 import * as jwt_decode from "jwt-decode";
 
-function PrivateRoute({ children, requiredRole }) {
+function getDecodedToken() {
   const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    return jwt_decode.default(token);
+  } catch {
+    return null;
+  }
+}
 
-  if (!token) {
+function PrivateRoute({ children, requiredRole }) {
+  const decoded = getDecodedToken();
+
+  if (!decoded) {
     return <Navigate to="/login" replace />;
   }
 
-  try {
-    // Dùng jwt_decode.default để decode token
-    const decoded = jwt_decode.default(token);
+  // Kiểm tra token hết hạn (nếu token có trường exp)
+  const now = Date.now().valueOf() / 1000;
+  if (decoded.exp && decoded.exp < now) {
+    return <Navigate to="/login" replace />;
+  }
 
-    if (requiredRole && decoded.role !== requiredRole) {
+  if (requiredRole) {
+    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    if (!roles.includes(decoded.role)) {
       return <Navigate to="/not-authorized" replace />;
     }
-
-    return children;
-  } catch (error) {
-    return <Navigate to="/login" replace />;
   }
+
+  return children;
 }
 
 export default PrivateRoute;
