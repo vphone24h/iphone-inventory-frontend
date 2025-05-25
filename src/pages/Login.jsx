@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import * as jwt_decode from "jwt-decode";  // Import đúng cách theo esm
+import * as jwt_decode from "jwt-decode";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -19,7 +19,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch(`${apiUrl}/api/admin-login`, {  // Gọi api admin-login (có phân biệt role)
+      const res = await fetch(`${apiUrl}/api/auth/login`, {  // Gọi api login user
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -31,15 +31,11 @@ function Login() {
         alert("✅ Đăng nhập thành công");
         localStorage.setItem("token", data.token);
 
-        // Giải mã token lấy role
+        // Giải mã token nếu muốn lấy thông tin
         const decoded = jwt_decode.default(data.token);
 
-        // Kiểm tra role để chuyển hướng
-        if (decoded.role === "admin") {
-          navigate("/admin-xet-duyet");  // Trang admin xét duyệt
-        } else {
-          navigate("/nhap-hang"); // Trang user bình thường
-        }
+        // Chuyển thẳng về trang nhập hàng (user)
+        navigate("/nhap-hang");
       } else {
         alert(`❌ ${data.message}`);
       }
@@ -189,24 +185,7 @@ function Login() {
           </button>
         </form>
 
-        {/* Nút chuyển sang đăng nhập admin */}
-        <div style={{ textAlign: "center", marginTop: 10 }}>
-          <button
-            onClick={() => navigate("/admin-login")}
-            style={{
-              backgroundColor: "#ff5722",
-              color: "#fff",
-              padding: "10px 20px",
-              borderRadius: 6,
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: 14,
-            }}
-          >
-            Đăng nhập Admin
-          </button>
-        </div>
+        {/* Đã bỏ nút đăng nhập Admin */}
 
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <span style={{ color: "#aaa", fontSize: 15 }}>
