@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";  // Cần cài thêm: npm install jwt-decode
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -29,7 +30,15 @@ function Login() {
       if (res.ok) {
         alert("✅ Đăng nhập thành công");
         localStorage.setItem("token", data.token);
-        navigate("/nhap-hang");
+
+        // Giải mã token lấy role
+        const decoded = jwt_decode(data.token);
+
+        if (decoded.role === "admin") {
+          navigate("/admin-xet-duyet");  // Thay bằng route admin xét duyệt của bạn
+        } else {
+          navigate("/nhap-hang"); // Route cho user thường hoặc trang chính
+        }
       } else {
         alert(`❌ ${data.message}`);
       }
