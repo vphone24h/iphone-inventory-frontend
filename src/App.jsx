@@ -1,16 +1,18 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
-import AdminLogin from "./pages/AdminLogin";   // <-- Bổ sung import AdminLogin
+import AdminLogin from "./pages/AdminLogin";
 import DangKy from "./pages/DangKy";
 import QuenMatKhau from "./pages/QuenMatKhau";
 import ResetMatKhau from "./pages/ResetMatKhau";
 import NhapHang from "./pages/NhapHang";
 import XuatHang from "./pages/XuatHang";
 import TonKhoSoLuong from "./pages/TonKhoSoLuong";
-import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
+import BaoCao from "./BaoCao"; // Nếu BaoCao.jsx nằm ngoài thư mục pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
-import QuanLyUser from "./pages/QuanLyUser"; // Bổ sung import trang quản lý user
+import QuanLyUser from "./pages/QuanLyUser";
+// Nếu bạn chưa có trang NotAuthorized, tạo file ./pages/NotAuthorized.jsx
+import NotAuthorized from "./pages/NotAuthorized";
 
 function App() {
   return (
@@ -18,12 +20,12 @@ function App() {
       {/* Public routes */}
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/admin-login" element={<AdminLogin />} />  {/* <-- Thêm route đăng nhập admin */}
+      <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/dang-ky" element={<DangKy />} />
       <Route path="/quen-mat-khau" element={<QuenMatKhau />} />
       <Route path="/reset-mat-khau/:token" element={<ResetMatKhau />} />
 
-      {/* Private routes (bảo vệ chung, cho user đã đăng nhập) */}
+      {/* Private routes */}
       <Route
         path="/nhap-hang"
         element={
@@ -65,7 +67,7 @@ function App() {
         }
       />
 
-      {/* Route mới: Quản lý user chờ duyệt - chỉ admin được vào */}
+      {/* Admin only routes */}
       <Route
         path="/quanlyuser"
         element={
@@ -74,6 +76,9 @@ function App() {
           </PrivateRoute>
         }
       />
+
+      {/* Not authorized */}
+      <Route path="/not-authorized" element={<NotAuthorized />} />
     </Routes>
   );
 }
