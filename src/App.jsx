@@ -11,7 +11,6 @@ import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
 import QuanLyUser from "./pages/QuanLyUser"; // Bổ sung import trang quản lý user
-import NotAuthorized from "./pages/NotAuthorized"; // Nếu chưa có, bạn tạo trang này
 
 function App() {
   return (
@@ -75,9 +74,6 @@ function App() {
           </PrivateRoute>
         }
       />
-
-      {/* Route trang không đủ quyền */}
-      <Route path="/not-authorized" element={<NotAuthorized />} />
     </Routes>
   );
 }
