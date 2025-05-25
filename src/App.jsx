@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
-import AdminLogin from "./pages/AdminLogin";
 import DangKy from "./pages/DangKy";
 import QuenMatKhau from "./pages/QuenMatKhau";
 import ResetMatKhau from "./pages/ResetMatKhau";
@@ -10,8 +9,6 @@ import TonKhoSoLuong from "./pages/TonKhoSoLuong";
 import BaoCao from "./BaoCao"; // Nếu BaoCao.jsx nằm ngoài thư mục pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
-import QuanLyUser from "./pages/QuanLyUser";
-import AdminDashboard from "./pages/AdminDashboard";  // <-- Bổ sung import
 import NotAuthorized from "./pages/NotAuthorized";
 
 function App() {
@@ -20,7 +17,6 @@ function App() {
       {/* Public routes */}
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/dang-ky" element={<DangKy />} />
       <Route path="/quen-mat-khau" element={<QuenMatKhau />} />
       <Route path="/reset-mat-khau/:token" element={<ResetMatKhau />} />
@@ -63,25 +59,6 @@ function App() {
         element={
           <PrivateRoute>
             <CongNo />
-          </PrivateRoute>
-        }
-      />
-
-      {/* Admin only routes */}
-      <Route
-        path="/admin-dashboard"
-        element={
-          <PrivateRoute requiredRole="admin">
-            <AdminDashboard />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/quanlyuser"
-        element={
-          <PrivateRoute requiredRole="admin">
-            <QuanLyUser />
           </PrivateRoute>
         }
       />
