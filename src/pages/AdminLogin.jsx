@@ -10,7 +10,10 @@ function AdminLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      // Lấy URL backend từ biến môi trường, bỏ dấu '/' cuối nếu có
       const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
+      
+      // Gửi yêu cầu đăng nhập admin
       const res = await fetch(`${API}/api/admin-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -20,9 +23,12 @@ function AdminLogin() {
       const data = await res.json();
 
       if (res.ok) {
+        // Lưu token vào localStorage
         localStorage.setItem("token", data.token);
         setMessage("");
-        navigate("/admin-dashboard"); // Thẳng vào trang admin dashboard
+        
+        // Điều hướng thẳng đến trang admin dashboard
+        navigate("/admin-dashboard");
       } else {
         setMessage(data.message || "Đăng nhập thất bại");
       }
