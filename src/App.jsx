@@ -9,7 +9,7 @@ import TonKhoSoLuong from "./pages/TonKhoSoLuong";
 import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
-import AdminXetDuyet from "./pages/AdminUserApprove"; // Trang admin xét duyệt (tạo file này)
+import AdminUserApprove from "./pages/AdminUserApprove"; // Đổi tên đúng với file và component
 
 function App() {
   return (
