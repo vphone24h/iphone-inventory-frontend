@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import * as jwt_decode from "jwt-decode";
 
 function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -12,7 +13,7 @@ function AdminLogin() {
     try {
       // Lấy URL backend từ biến môi trường, bỏ dấu '/' cuối nếu có
       const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
-      
+
       // Gửi yêu cầu đăng nhập admin
       const res = await fetch(`${API}/api/admin-login`, {
         method: "POST",
@@ -26,7 +27,17 @@ function AdminLogin() {
         // Lưu token vào localStorage
         localStorage.setItem("token", data.token);
         setMessage("");
-        
+
+        // Giải mã token lấy role
+        const decoded = jwt_decode.default(data.token);
+
+        // Nếu không phải admin thì báo lỗi hoặc chuyển về login
+        if (decoded.role !== "admin") {
+          setMessage("❌ Bạn không có quyền truy cập trang này.");
+          localStorage.removeItem("token");
+          return;
+        }
+
         // Điều hướng thẳng đến trang admin dashboard
         navigate("/admin-dashboard");
       } else {

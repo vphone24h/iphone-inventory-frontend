@@ -19,7 +19,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch(`${apiUrl}/api/admin-login`, {
+      const res = await fetch(`${apiUrl}/api/admin-login`, {  // Gọi api admin-login (có phân biệt role)
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -34,10 +34,11 @@ function Login() {
         // Giải mã token lấy role
         const decoded = jwt_decode.default(data.token);
 
+        // Kiểm tra role để chuyển hướng
         if (decoded.role === "admin") {
-          navigate("/admin-xet-duyet");  // Điều hướng trang dành cho admin
+          navigate("/admin-xet-duyet");  // Trang admin xét duyệt
         } else {
-          navigate("/nhap-hang"); // Điều hướng trang dành cho user thường
+          navigate("/nhap-hang"); // Trang user bình thường
         }
       } else {
         alert(`❌ ${data.message}`);
