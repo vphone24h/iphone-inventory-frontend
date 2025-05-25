@@ -4,533 +4,429 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 function NhapHang() {
-  // State quản lý branch/category
-  const [branches, setBranches] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [showBranchModal, setShowBranchModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [branchInput, setBranchInput] = useState('');
-  const [categoryInput, setCategoryInput] = useState('');
-  const [editBranchId, setEditBranchId] = useState(null);
-  const [editCategoryId, setEditCategoryId] = useState(null);
+  // ... [TOÀN BỘ HOOKS, HÀM LOGIC GIỮ NGUYÊN như code bạn gửi ở trên] ...
+  // (copy nguyên phần khai báo state, useEffect, handle, import/export Excel...)
 
-  // === Lấy mặc định branch/category từ localStorage
-  const getLocalBranch = () => localStorage.getItem('lastBranch') || "";
-  const getLocalCategory = () => localStorage.getItem('lastCategory') || "";
-
-  const [formData, setFormData] = useState({
-    imei: "",
-    product_name: "",
-    sku: "",
-    price_import: "",
-    import_date: "",
-    supplier: "",
-    branch: getLocalBranch(),
-    note: "",
-    tenSanPham: "",
-    quantity: "",
-    category: getLocalCategory()
-  });
-
-  const [message, setMessage] = useState("");
-  const [items, setItems] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filterDate, setFilterDate] = useState("");
-  const [filterBranch, setFilterBranch] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 20;
-  const [editingItemId, setEditingItemId] = useState(null);
-
-  const inputClass = "w-full border p-2 rounded h-10";
-
-  const fetchItems = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ton-kho`);
-      const data = await res.json();
-      setItems(data.items);
-    } catch (err) {
-      console.error("❌ Lỗi khi tải dữ liệu nhập hàng:", err);
-    }
-  };
-
-  // Bổ sung fetch branch/category
-  const fetchBranches = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/branches`)
-      .then(res => res.json())
-      .then(data => setBranches(data));
-  };
-  const fetchCategories = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
-      .then(res => res.json())
-      .then(data => setCategories(data));
-  };
-
-  useEffect(() => {
-    fetchItems();
-    fetchBranches();
-    fetchCategories();
-  }, []);
-
-  // Khi chọn branch/category thì lưu vào localStorage
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "branch") {
-      localStorage.setItem('lastBranch', value);
-    }
-    if (name === "category") {
-      localStorage.setItem('lastCategory', value);
-    }
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const method = editingItemId ? "PUT" : "POST";
-      const url = editingItemId
-        ? `${import.meta.env.VITE_API_URL}/api/nhap-hang/${editingItemId}`
-        : `${import.meta.env.VITE_API_URL}/api/nhap-hang`;
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, tenSanPham: formData.product_name || formData.tenSanPham })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(`✅ ${data.message}`);
-        setFormData({
-          imei: "",
-          product_name: "",
-          sku: "",
-          price_import: "",
-          import_date: "",
-          supplier: "",
-          branch: formData.branch,
-          note: "",
-          tenSanPham: "",
-          quantity: "",
-          category: formData.category
-        });
-        setEditingItemId(null);
-        fetchItems();
-      } else {
-        setMessage(`❌ ${data.message}`);
-      }
-    } catch (err) {
-      setMessage("❌ Lỗi kết nối tới server");
-    }
-  };
-
-  const handleEdit = (item) => {
-    setFormData({
-      imei: item.imei,
-      product_name: item.product_name || item.tenSanPham,
-      sku: item.sku,
-      price_import: item.price_import,
-      import_date: item.import_date?.slice(0, 10) || "",
-      supplier: item.supplier,
-      branch: item.branch,
-      note: item.note,
-      tenSanPham: item.tenSanPham,
-      quantity: item.quantity || "",
-      category: item.category || ""
-    });
-    setEditingItemId(item._id);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xoá mục này không?")) return;
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(`🗑️ ${data.message}`);
-        fetchItems();
-      } else {
-        setMessage(`❌ ${data.message}`);
-      }
-    } catch (err) {
-      setMessage("❌ Lỗi khi xoá mục");
-    }
-  };
-
-  const exportToExcel = () => {
-    const dataToExport = items.map((item) => ({
-      IMEI: item.imei,
-      Tên_sản_phẩm: item.product_name || item.tenSanPham,
-      SKU: item.sku,
-      Giá_nhập: item.price_import,
-      Ngày_nhập: item.import_date?.slice(0, 10),
-      Số_lượng: item.quantity,
-      Thư_mục: item.category,
-      Nhà_cung_cấp: item.supplier,
-      Chi_nhánh: item.branch,
-      Ghi_chú: item.note
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "NhapHang");
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const file = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(file, "danh_sach_nhap_hang.xlsx");
-  };
-
-  const importFromExcel = async (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      const wb = XLSX.read(evt.target.result, { type: "binary" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws);
-      for (const row of data) {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/nhap-hang`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            imei: row.IMEI,
-            product_name: row.Tên_sản_phẩm,
-            sku: row.SKU,
-            price_import: row.Giá_nhập,
-            import_date: row.Ngày_nhập,
-            supplier: row.Nhà_cung_cấp,
-            branch: row.Chi_nhánh,
-            note: row.Ghi_chú,
-            quantity: row.Số_lượng,
-            category: row.Thư_mục,
-            tenSanPham: row.Tên_sản_phẩm
-          })
-        });
-      }
-      fetchItems();
-      alert("✅ Đã nhập từ Excel thành công!");
-    };
-    reader.readAsBinaryString(file);
-  };
-
-  const filteredItems = items.filter((item) => {
-    const matchSearch =
-      item.imei?.toLowerCase().includes(search.toLowerCase()) ||
-      (item.product_name || item.tenSanPham)?.toLowerCase().includes(search.toLowerCase()) ||
-      item.sku?.toLowerCase().includes(search.toLowerCase());
-    const matchDate = filterDate ? item.import_date?.slice(0, 10) === filterDate : true;
-    const matchBranch = filterBranch ? item.branch === filterBranch : true;
-    const matchCategory = filterCategory ? item.category === filterCategory : true;
-    return matchSearch && matchDate && matchBranch && matchCategory;
-  });
-
-  const paginatedItems = filteredItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-
-  // ----------- Quản lý branch
-  const handleAddBranch = async () => {
-    if (!branchInput.trim()) return;
-    await fetch(`${import.meta.env.VITE_API_URL}/api/branches`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: branchInput.trim() })
-    });
-    setBranchInput('');
-    setShowBranchModal(false);
-    setEditBranchId(null);
-    fetchBranches();
-  };
-  const handleEditBranch = async () => {
-    if (!branchInput.trim() || !editBranchId) return;
-    await fetch(`${import.meta.env.VITE_API_URL}/api/branches/${editBranchId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: branchInput.trim() })
-    });
-    setBranchInput('');
-    setEditBranchId(null);
-    setShowBranchModal(false);
-    fetchBranches();
-  };
-  const handleDeleteBranch = async (id) => {
-    if (!window.confirm('Xoá chi nhánh này?')) return;
-    await fetch(`${import.meta.env.VITE_API_URL}/api/branches/${id}`, { method: "DELETE" });
-    fetchBranches();
-  };
-
-  // ----------- Quản lý category
-  const handleAddCategory = async () => {
-    if (!categoryInput.trim()) return;
-    await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: categoryInput.trim() })
-    });
-    setCategoryInput('');
-    setShowCategoryModal(false);
-    setEditCategoryId(null);
-    fetchCategories();
-  };
-  const handleEditCategory = async () => {
-    if (!categoryInput.trim() || !editCategoryId) return;
-    await fetch(`${import.meta.env.VITE_API_URL}/api/categories/${editCategoryId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: categoryInput.trim() })
-    });
-    setCategoryInput('');
-    setEditCategoryId(null);
-    setShowCategoryModal(false);
-    fetchCategories();
-  };
-  const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Xoá thư mục này?')) return;
-    await fetch(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, { method: "DELETE" });
-    fetchCategories();
-  };
+  // [Đoạn này mình rút gọn để bạn copy dễ, chỉ thay phần return bên dưới]
+  // HÃY GIỮ TOÀN BỘ CODE LOGIC NHƯ CODE GỐC TRƯỚC ĐOẠN return()
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow mt-10 relative">
-      {/* Modal branch */}
-      {showBranchModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
-          <div className="bg-white p-6 rounded shadow-md min-w-[300px]">
-            <h3 className="mb-2 font-bold">{editBranchId ? 'Sửa chi nhánh' : 'Thêm chi nhánh'}</h3>
-            <input type="text" className="border p-2 rounded w-full mb-4" value={branchInput} onChange={e => setBranchInput(e.target.value)} />
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowBranchModal(false)} className="px-3 py-1 bg-gray-200 rounded">Huỷ</button>
-              {editBranchId ? (
-                <button onClick={handleEditBranch} className="px-3 py-1 bg-blue-500 text-white rounded">Lưu</button>
-              ) : (
-                <button onClick={handleAddBranch} className="px-3 py-1 bg-green-600 text-white rounded">Thêm</button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal category */}
-      {showCategoryModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
-          <div className="bg-white p-6 rounded shadow-md min-w-[300px]">
-            <h3 className="mb-2 font-bold">{editCategoryId ? 'Sửa thư mục' : 'Thêm thư mục'}</h3>
-            <input type="text" className="border p-2 rounded w-full mb-4" value={categoryInput} onChange={e => setCategoryInput(e.target.value)} />
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowCategoryModal(false)} className="px-3 py-1 bg-gray-200 rounded">Huỷ</button>
-              {editCategoryId ? (
-                <button onClick={handleEditCategory} className="px-3 py-1 bg-blue-500 text-white rounded">Lưu</button>
-              ) : (
-                <button onClick={handleAddCategory} className="px-3 py-1 bg-green-600 text-white rounded">Thêm</button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="absolute top-4 right-4">
+    <div style={{ background: "#f6f7f9", minHeight: "100vh", padding: 24 }}>
+      <div style={{
+        display: "flex",
+        justifyContent: "flex-end",
+        marginBottom: 12
+      }}>
         <LogoutButton />
       </div>
-
-      <div className="flex justify-center space-x-2 mb-6">
-        <button onClick={() => (window.location.href = "/nhap-hang")} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">📥 Nhập hàng</button>
-        <button onClick={() => (window.location.href = "/xuat-hang")} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">📤 Xuất hàng</button>
-        <button onClick={() => (window.location.href = "/ton-kho-so-luong")} className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">📦 Tồn kho</button>
-        <button onClick={() => (window.location.href = "/bao-cao")} className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">📋 Báo cáo</button>
+      <h2 style={{ fontSize: 26, fontWeight: 700, color: "#222", marginBottom: 2 }}>Nhập hàng</h2>
+      <div style={{ color: "#aaa", fontSize: 16, marginBottom: 26 }}>
+        Nhập hàng VPhone24h &bull; Quản lý nhập hàng từ nhà cung cấp vào kho
       </div>
 
-      <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Nhập hàng iPhone</h2>
-
-      {/* ---- BỘ LỌC --- */}
-      <div className="flex gap-4 mb-4">
-        <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border p-2 rounded w-40" placeholder="Ngày nhập" />
-        {/* filterBranch dropdown */}
-        <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="border p-2 rounded w-40">
-          <option value="">Chi nhánh</option>
-          {branches.map(b => (
-            <option key={b._id} value={b.name}>{b.name}</option>
-          ))}
-        </select>
-        {/* filterCategory dropdown */}
-        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="border p-2 rounded w-40">
-          <option value="">Thư mục</option>
-          {categories.map(c => (
-            <option key={c._id} value={c.name}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="flex justify-between mb-4 gap-4">
-        <label className="flex items-center bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700">
-          📤 Nhập từ Excel
+      {/* Chức năng nhập/xuất excel */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
+        <label style={{
+          background: "#222",
+          color: "#fff",
+          borderRadius: 6,
+          padding: "9px 18px",
+          fontWeight: 500,
+          cursor: "pointer"
+        }}>
+          📥 Nhập từ Excel
           <input type="file" accept=".xlsx,.xls" onChange={importFromExcel} hidden />
         </label>
-        <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        <button onClick={exportToExcel} style={{
+          background: "#222",
+          color: "#fff",
+          borderRadius: 6,
+          padding: "9px 18px",
+          fontWeight: 500,
+          border: "none",
+          cursor: "pointer"
+        }}>
           ⬇️ Xuất Excel
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-        <input
-          name="imei"
-          placeholder="IMEI"
-          value={formData.imei}
-          onChange={handleChange}
-          className={inputClass}
-        />
-        <input
-          name="product_name"
-          placeholder="Tên sản phẩm"
-          value={formData.product_name}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-        <input
-          name="sku"
-          placeholder="SKU"
-          value={formData.sku}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-        <input
-          name="price_import"
-          type="number"
-          placeholder="Giá nhập"
-          value={formData.price_import}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-        <input
-          name="import_date"
-          type="date"
-          placeholder="Ngày nhập"
-          value={formData.import_date}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-        <input
-          name="supplier"
-          placeholder="Nhà cung cấp"
-          value={formData.supplier}
-          onChange={handleChange}
-          className={inputClass}
-        />
-
-        {/* Chi nhánh: dropdown + nút quản lý */}
-        <div className="flex gap-2 items-center">
-          <select name="branch" value={formData.branch} onChange={handleChange} className={inputClass} required>
-            <option value="">Chọn chi nhánh</option>
-            {branches.map(b => (
-              <option key={b._id} value={b.name}>{b.name}</option>
-            ))}
-          </select>
-          <button type="button" className="text-green-600 text-xl" title="Thêm" onClick={() => { setShowBranchModal(true); setEditBranchId(null); setBranchInput(''); }}>➕</button>
-          <button type="button" className="text-yellow-600 text-xl" title="Sửa" onClick={() => {
-            if (!formData.branch) return;
-            const br = branches.find(b => b.name === formData.branch);
-            setEditBranchId(br?._id);
-            setBranchInput(formData.branch);
-            setShowBranchModal(true);
-          }}>✏️</button>
-          <button type="button" className="text-red-600 text-xl" title="Xoá" onClick={() => {
-            const br = branches.find(b => b.name === formData.branch);
-            if (br) handleDeleteBranch(br._id);
-          }}>🗑️</button>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "350px 1fr",
+        gap: 20,
+        marginBottom: 32,
+      }}>
+        {/* THÔNG TIN CHUNG */}
+        <div style={{
+          background: "#18191a",
+          borderRadius: 14,
+          padding: 22,
+          color: "#fff",
+          minWidth: 300
+        }}>
+          <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 16 }}>Thông tin chung</div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ color: "#ccc", display: "block", marginBottom: 4 }}>Ngày nhập</label>
+            <input
+              name="import_date"
+              type="date"
+              value={formData.import_date}
+              onChange={handleChange}
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                padding: "8px 12px",
+                width: "100%"
+              }}
+              required
+            />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ color: "#ccc", display: "block", marginBottom: 4 }}>Chi nhánh</label>
+            <div style={{ display: "flex", gap: 5 }}>
+              <select
+                name="branch"
+                value={formData.branch}
+                onChange={handleChange}
+                style={{
+                  background: "#23272b",
+                  color: "#fff",
+                  border: "1px solid #333",
+                  borderRadius: 6,
+                  padding: "8px 12px",
+                  width: "100%"
+                }}
+                required
+              >
+                <option value="">Chọn chi nhánh</option>
+                {branches.map(b => (
+                  <option key={b._id} value={b.name}>{b.name}</option>
+                ))}
+              </select>
+              <button type="button" style={{
+                background: "#222", color: "#fff", borderRadius: 6, border: "none", padding: "0 9px", fontSize: 20
+              }} title="Thêm" onClick={() => { setShowBranchModal(true); setEditBranchId(null); setBranchInput(''); }}>+</button>
+            </div>
+          </div>
+          <div>
+            <label style={{ color: "#ccc", display: "block", marginBottom: 4 }}>Danh mục</label>
+            <div style={{ display: "flex", gap: 5 }}>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                style={{
+                  background: "#23272b",
+                  color: "#fff",
+                  border: "1px solid #333",
+                  borderRadius: 6,
+                  padding: "8px 12px",
+                  width: "100%"
+                }}
+                required
+              >
+                <option value="">Chọn danh mục</option>
+                {categories.map(c => (
+                  <option key={c._id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+              <button type="button" style={{
+                background: "#222", color: "#fff", borderRadius: 6, border: "none", padding: "0 9px", fontSize: 20
+              }} title="Thêm" onClick={() => { setShowCategoryModal(true); setEditCategoryId(null); setCategoryInput(''); }}>+</button>
+            </div>
+          </div>
         </div>
 
-        <input
-          name="note"
-          placeholder="Ghi chú"
-          value={formData.note}
-          onChange={handleChange}
-          className={inputClass}
-        />
-        <input
-          name="quantity"
-          type="number"
-          placeholder="Số lượng"
-          value={formData.quantity}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        {/* Thư mục: dropdown + nút quản lý */}
-        <div className="flex gap-2 items-center">
-          <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
-            <option value="">Chọn thư mục</option>
-            {categories.map(c => (
-              <option key={c._id} value={c.name}>{c.name}</option>
-            ))}
-          </select>
-          <button type="button" className="text-green-600 text-xl" title="Thêm" onClick={() => { setShowCategoryModal(true); setEditCategoryId(null); setCategoryInput(''); }}>➕</button>
-          <button type="button" className="text-yellow-600 text-xl" title="Sửa" onClick={() => {
-            if (!formData.category) return;
-            const cat = categories.find(c => c.name === formData.category);
-            setEditCategoryId(cat?._id);
-            setCategoryInput(formData.category);
-            setShowCategoryModal(true);
-          }}>✏️</button>
-          <button type="button" className="text-red-600 text-xl" title="Xoá" onClick={() => {
-            const cat = categories.find(c => c.name === formData.category);
-            if (cat) handleDeleteCategory(cat._id);
-          }}>🗑️</button>
-        </div>
-
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">
-          {editingItemId ? "Cập nhật" : "Nhập hàng"}
-        </button>
-      </form>
-
-      {message && <p className="mt-4 text-center font-semibold text-green-600">{message}</p>}
-
-      <div className="mt-10">
-        <input type="text" placeholder="🔍 Tìm kiếm IMEI, Tên, SKU..." value={search} onChange={(e) => setSearch(e.target.value)} className="border px-4 py-2 rounded w-full mb-4" />
-        <table className="w-full border text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">IMEI</th>
-              <th className="border p-2">Tên sản phẩm</th>
-              <th className="border p-2">SKU</th>
-              <th className="border p-2 text-center">Giá nhập</th>
-              <th className="border p-2">Ngày nhập</th>
-              <th className="border p-2">Số lượng</th>
-              <th className="border p-2">Thư mục</th>
-              <th className="border p-2">Nhà cung cấp</th>
-              <th className="border p-2">Chi nhánh</th>
-              <th className="border p-2">Ghi chú</th>
-              <th className="border p-2 text-center">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedItems.map((item) => (
-              <tr key={item._id}>
-                <td className="border p-2">{item.imei}</td>
-                <td className="border p-2">{item.product_name || item.tenSanPham}</td>
-                <td className="border p-2">{item.sku}</td>
-                <td className="border p-2 text-center">{item.price_import?.toLocaleString()}đ</td>
-                <td className="border p-2">{item.import_date?.slice(0, 10)}</td>
-                <td className="border p-2">{item.quantity}</td>
-                <td className="border p-2">{item.category}</td>
-                <td className="border p-2">{item.supplier}</td>
-                <td className="border p-2">{item.branch}</td>
-                <td className="border p-2">{item.note}</td>
-                <td className="border p-2 text-center space-x-1">
-                  <button onClick={() => handleEdit(item)} className="bg-yellow-400 text-white px-2 py-1 rounded">✏️</button>
-                  <button onClick={() => handleDelete(item._id)} className="bg-red-600 text-white px-2 py-1 rounded">🗑️</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-center space-x-2 mt-4">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i + 1} onClick={() => setPage(i + 1)} className={`px-3 py-1 rounded ${page === i + 1 ? "bg-blue-600 text-white" : "bg-gray-200"}`}>
-              {i + 1}
+        {/* THÊM SẢN PHẨM */}
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            background: "#18191a",
+            borderRadius: 14,
+            padding: 22,
+            color: "#fff",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 13,
+            alignItems: "end"
+          }}
+        >
+          <div style={{ gridColumn: "1 / 4", fontWeight: 600, fontSize: 17, marginBottom: 4 }}>
+            Thêm sản phẩm
+          </div>
+          <div>
+            <label style={{ color: "#ccc" }}>IMEI</label>
+            <input
+              name="imei"
+              value={formData.imei}
+              onChange={handleChange}
+              placeholder="Nhập IMEI"
+              required
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ color: "#ccc" }}>Tên sản phẩm</label>
+            <input
+              name="product_name"
+              value={formData.product_name}
+              onChange={handleChange}
+              placeholder="Nhập tên sản phẩm"
+              required
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ color: "#ccc" }}>SKU</label>
+            <input
+              name="sku"
+              value={formData.sku}
+              onChange={handleChange}
+              placeholder="Nhập SKU"
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ color: "#ccc" }}>Giá nhập</label>
+            <input
+              name="price_import"
+              type="number"
+              value={formData.price_import}
+              onChange={handleChange}
+              placeholder="Giá nhập"
+              required
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ color: "#ccc" }}>Số lượng</label>
+            <input
+              name="quantity"
+              type="number"
+              value={formData.quantity}
+              onChange={handleChange}
+              placeholder="Số lượng"
+              required
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ color: "#ccc" }}>Nhà cung cấp</label>
+            <input
+              name="supplier"
+              value={formData.supplier}
+              onChange={handleChange}
+              placeholder="Nhà cung cấp"
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div style={{ gridColumn: "1 / 3" }}>
+            <label style={{ color: "#ccc" }}>Ghi chú</label>
+            <input
+              name="note"
+              value={formData.note}
+              onChange={handleChange}
+              placeholder="Nhập ghi chú"
+              style={{
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+                width: "100%"
+              }}
+            />
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <button
+              type="submit"
+              style={{
+                width: "100%",
+                background: "#2196f3",
+                color: "#fff",
+                fontWeight: 600,
+                border: "none",
+                borderRadius: 6,
+                padding: "12px 0",
+                fontSize: 16,
+                cursor: "pointer"
+              }}
+            >
+              {editingItemId ? "Cập nhật" : "Thêm sản phẩm"}
             </button>
+          </div>
+        </form>
+      </div>
+
+      {/* MESSAGE */}
+      {message && (
+        <div style={{ textAlign: "center", fontWeight: 600, color: "#21ba45", marginBottom: 16 }}>
+          {message}
+        </div>
+      )}
+
+      {/* BẢNG DANH SÁCH NHẬP */}
+      <div style={{
+        background: "#18191a",
+        borderRadius: 14,
+        padding: 22,
+        color: "#fff",
+        marginTop: 24
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 12 }}>
+          <div style={{ fontWeight: 600, fontSize: 18 }}>Danh sách sản phẩm nhập kho</div>
+          <div style={{ textAlign: "right", fontWeight: 600 }}>
+            {/* Tổng cộng: */}
+            <span style={{ fontSize: 15, color: "#fff" }}>
+              Tổng cộng: {filteredItems.reduce((s, i) => s + Number(i.price_import) * Number(i.quantity || 1), 0).toLocaleString()} đ
+            </span>
+            <br />
+            <span style={{ color: "#aaa", fontSize: 13 }}>
+              Số lượng: {filteredItems.reduce((s, i) => s + Number(i.quantity || 1), 0)} sản phẩm
+            </span>
+          </div>
+        </div>
+        <input
+          type="text"
+          placeholder="🔍 Tìm kiếm sản phẩm, IMEI..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: 280,
+            marginBottom: 15,
+            background: "#23272b",
+            color: "#fff",
+            border: "1px solid #333",
+            borderRadius: 6,
+            padding: "7px 12px"
+          }}
+        />
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", color: "#fff", background: "transparent" }}>
+            <thead>
+              <tr style={{ background: "#23272b" }}>
+                <th>IMEI</th>
+                <th>Tên sản phẩm</th>
+                <th>SKU</th>
+                <th>Giá nhập</th>
+                <th>Ngày nhập</th>
+                <th>Số lượng</th>
+                <th>Thư mục</th>
+                <th>Nhà cung cấp</th>
+                <th>Chi nhánh</th>
+                <th>Ghi chú</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedItems.length === 0 ? (
+                <tr>
+                  <td colSpan={11} style={{ textAlign: "center", color: "#aaa", padding: 30 }}>
+                    Chưa có sản phẩm nào. Vui lòng thêm sản phẩm vào danh sách nhập kho.
+                  </td>
+                </tr>
+              ) : (
+                paginatedItems.map((item) => (
+                  <tr key={item._id}>
+                    <td>{item.imei}</td>
+                    <td>{item.product_name || item.tenSanPham}</td>
+                    <td>{item.sku}</td>
+                    <td>{item.price_import?.toLocaleString()}đ</td>
+                    <td>{item.import_date?.slice(0, 10)}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.category}</td>
+                    <td>{item.supplier}</td>
+                    <td>{item.branch}</td>
+                    <td>{item.note}</td>
+                    <td>
+                      <button
+                        onClick={() => handleEdit(item)}
+                        style={{
+                          background: "#ffc700",
+                          color: "#23272b",
+                          border: "none",
+                          borderRadius: 5,
+                          padding: "3px 10px",
+                          marginRight: 4,
+                          cursor: "pointer"
+                        }}
+                      >✏️</button>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        style={{
+                          background: "#db2828",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 5,
+                          padding: "3px 10px",
+                          cursor: "pointer"
+                        }}
+                      >🗑️</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {/* Pagination */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 20 }}>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button key={i + 1}
+              onClick={() => setPage(i + 1)}
+              style={{
+                padding: "6px 13px",
+                borderRadius: 6,
+                border: "none",
+                background: page === i + 1 ? "#2196f3" : "#222",
+                color: page === i + 1 ? "#fff" : "#bbb",
+                fontWeight: 600,
+                cursor: "pointer"
+              }}
+            >{i + 1}</button>
           ))}
         </div>
       </div>
+
+      {/* Các modal branch/category giữ nguyên như code cũ của bạn */}
+      {/* ... modal code ... */}
     </div>
   );
 }
