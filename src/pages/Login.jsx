@@ -52,30 +52,27 @@ function Login() {
       <div
         style={{
           background: "#18191a",
-          borderRadius: 16,
-          padding: 38,
+          borderRadius: 24,
+          padding: 40,
           minWidth: 380,
           maxWidth: 400,
-          boxShadow: "0 6px 24px #0002"
+          boxShadow: "0 8px 32px #0002"
         }}
       >
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <img
-            src="/logo-vphone.png"
-            alt="VPhone24h Logo"
-            style={{ width: 54, height: 54, objectFit: "contain", marginBottom: 8 }}
-          />
-          <div style={{ fontWeight: 700, fontSize: 22, color: "#ff4d1c", marginBottom: 2 }}>
-            VPhone24h
-          </div>
-          <div style={{ color: "#cccccc", fontSize: 15, marginTop: 2, marginBottom: 6 }}>
-            Hệ thống quản lý kho hàng điện thoại chuyên nghiệp
-          </div>
+        {/* Dòng tiêu đề mới */}
+        <div style={{
+          textAlign: "center",
+          fontSize: 22,
+          fontWeight: 700,
+          color: "#fff",
+          marginBottom: 32
+        }}>
+          Đăng nhập để sử dụng
         </div>
+
         <form onSubmit={handleLogin} autoComplete="off">
           <div style={{ marginBottom: 15 }}>
-            <label style={{ color: "#fff", display: "block", marginBottom: 6 }}>Tên đăng nhập</label>
+            <label style={{ color: "#fff", display: "block", marginBottom: 6, fontWeight: 600 }}>Tên đăng nhập</label>
             <input
               type="email"
               placeholder="Nhập email đăng nhập"
@@ -95,7 +92,7 @@ function Login() {
             />
           </div>
           <div style={{ marginBottom: 15 }}>
-            <label style={{ color: "#fff", display: "block", marginBottom: 6 }}>Mật khẩu</label>
+            <label style={{ color: "#fff", display: "block", marginBottom: 6, fontWeight: 600 }}>Mật khẩu</label>
             <input
               type="password"
               placeholder="Nhập mật khẩu"
@@ -116,14 +113,14 @@ function Login() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: 18,
+            marginBottom: 20,
           }}>
             <label style={{ color: "#ccc", display: "flex", alignItems: "center", fontSize: 15 }}>
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={e => setRemember(e.target.checked)}
-                style={{ marginRight: 6, accentColor: "#ff4d1c" }}
+                style={{ marginRight: 6, accentColor: "#2196f3" }}
               />
               Ghi nhớ đăng nhập
             </label>
@@ -137,20 +134,21 @@ function Login() {
               width: "100%",
               background: "#2196f3",
               color: "#fff",
-              fontWeight: 600,
+              fontWeight: 700,
               border: "none",
               borderRadius: 6,
-              padding: "12px 0",
-              fontSize: 17,
+              padding: "14px 0",
+              fontSize: 18,
               marginBottom: 18,
-              cursor: "pointer"
+              cursor: "pointer",
+              letterSpacing: 1,
             }}
           >
-            Đăng nhập
+            ĐĂNG NHẬP
           </button>
         </form>
-        <div style={{ textAlign: "center", marginTop: 8 }}>
-          <span style={{ color: "#aaa", fontSize: 14 }}>
+        <div style={{ textAlign: "center", marginTop: 10 }}>
+          <span style={{ color: "#aaa", fontSize: 15 }}>
             Chưa có tài khoản?{" "}
             <Link to="/dang-ky" style={{ color: "#2196f3", textDecoration: "underline" }}>
               Đăng ký ngay
