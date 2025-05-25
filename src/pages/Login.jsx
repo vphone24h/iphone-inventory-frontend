@@ -40,72 +40,122 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-      <div className="bg-black bg-opacity-90 rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#fafbfc",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          background: "#18191a",
+          borderRadius: 16,
+          padding: 38,
+          minWidth: 380,
+          maxWidth: 400,
+          boxShadow: "0 6px 24px #0002"
+        }}
+      >
         {/* Logo */}
-        <div className="flex justify-center mb-4">
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
           <img
             src="/logo-vphone.png"
             alt="VPhone24h Logo"
-            className="w-16 h-16 object-contain"
+            style={{ width: 54, height: 54, objectFit: "contain", marginBottom: 8 }}
           />
+          <div style={{ fontWeight: 700, fontSize: 22, color: "#ff4d1c", marginBottom: 2 }}>
+            VPhone24h
+          </div>
+          <div style={{ color: "#cccccc", fontSize: 15, marginTop: 2, marginBottom: 6 }}>
+            Hệ thống quản lý kho hàng điện thoại chuyên nghiệp
+          </div>
         </div>
-        <h1 className="text-3xl font-bold text-center text-orange-500 mb-2">VPhone24h</h1>
-        <p className="text-gray-300 text-center mb-6">
-          Hệ thống quản lý kho hàng điện thoại
-        </p>
-
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-gray-300 text-left mb-1">Tên đăng nhập (Email)</label>
+        <form onSubmit={handleLogin} autoComplete="off">
+          <div style={{ marginBottom: 15 }}>
+            <label style={{ color: "#fff", display: "block", marginBottom: 6 }}>Tên đăng nhập</label>
             <input
               type="email"
               placeholder="Nhập email đăng nhập"
-              className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              style={{
+                width: "100%",
+                padding: "12px 10px",
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #282a36",
+                borderRadius: 6,
+                marginBottom: 4
+              }}
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
               autoFocus
             />
           </div>
-          <div>
-            <label className="block text-gray-300 text-left mb-1">Mật khẩu</label>
+          <div style={{ marginBottom: 15 }}>
+            <label style={{ color: "#fff", display: "block", marginBottom: 6 }}>Mật khẩu</label>
             <input
               type="password"
               placeholder="Nhập mật khẩu"
-              className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              style={{
+                width: "100%",
+                padding: "12px 10px",
+                background: "#23272b",
+                color: "#fff",
+                border: "1px solid #282a36",
+                borderRadius: 6
+              }}
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
             />
           </div>
-          <div className="flex items-center justify-between">
-            <label className="flex items-center text-gray-400 text-sm">
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 18,
+          }}>
+            <label style={{ color: "#ccc", display: "flex", alignItems: "center", fontSize: 15 }}>
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={e => setRemember(e.target.checked)}
-                className="mr-2 accent-orange-500"
+                style={{ marginRight: 6, accentColor: "#ff4d1c" }}
               />
               Ghi nhớ đăng nhập
             </label>
-            <Link to="/quen-mat-khau" className="text-sm text-blue-400 hover:underline">
+            <Link to="/quen-mat-khau" style={{ color: "#33aaff", fontSize: 15, textDecoration: "none" }}>
               Quên mật khẩu?
             </Link>
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold text-lg transition duration-200"
+            style={{
+              width: "100%",
+              background: "#2196f3",
+              color: "#fff",
+              fontWeight: 600,
+              border: "none",
+              borderRadius: 6,
+              padding: "12px 0",
+              fontSize: 17,
+              marginBottom: 18,
+              cursor: "pointer"
+            }}
           >
             Đăng nhập
           </button>
         </form>
-
-        <div className="text-center text-gray-400 text-sm mt-6">
-          Chưa có tài khoản?{" "}
-          <Link to="/dang-ky" className="text-blue-400 hover:underline">
-            Đăng ký ngay
-          </Link>
+        <div style={{ textAlign: "center", marginTop: 8 }}>
+          <span style={{ color: "#aaa", fontSize: 14 }}>
+            Chưa có tài khoản?{" "}
+            <Link to="/dang-ky" style={{ color: "#2196f3", textDecoration: "underline" }}>
+              Đăng ký ngay
+            </Link>
+          </span>
         </div>
       </div>
     </div>
