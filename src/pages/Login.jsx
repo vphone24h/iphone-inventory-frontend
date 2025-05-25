@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import jwt_decode from "jwt-decode";  // Cần cài thêm: npm install jwt-decode
+import * as jwt_decode from "jwt-decode";  // Sửa import jwt-decode đúng cách
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ function Login() {
         localStorage.setItem("token", data.token);
 
         // Giải mã token lấy role
-        const decoded = jwt_decode(data.token);
+        const decoded = jwt_decode.default(data.token);
 
         if (decoded.role === "admin") {
           navigate("/admin-xet-duyet");  // Điều hướng trang dành cho admin
@@ -65,22 +65,33 @@ function Login() {
           padding: 40,
           minWidth: 380,
           maxWidth: 400,
-          boxShadow: "0 8px 32px #0002"
+          boxShadow: "0 8px 32px #0002",
         }}
       >
-        <div style={{
-          textAlign: "center",
-          fontSize: 22,
-          fontWeight: 700,
-          color: "#fff",
-          marginBottom: 32
-        }}>
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: 22,
+            fontWeight: 700,
+            color: "#fff",
+            marginBottom: 32,
+          }}
+        >
           Đăng nhập để sử dụng
         </div>
 
         <form onSubmit={handleLogin} autoComplete="off">
           <div style={{ marginBottom: 15 }}>
-            <label style={{ color: "#fff", display: "block", marginBottom: 6, fontWeight: 600 }}>Tên đăng nhập</label>
+            <label
+              style={{
+                color: "#fff",
+                display: "block",
+                marginBottom: 6,
+                fontWeight: 600,
+              }}
+            >
+              Tên đăng nhập
+            </label>
             <input
               type="email"
               placeholder="Nhập email đăng nhập"
@@ -91,16 +102,25 @@ function Login() {
                 color: "#fff",
                 border: "1px solid #282a36",
                 borderRadius: 6,
-                marginBottom: 4
+                marginBottom: 4,
               }}
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
             />
           </div>
           <div style={{ marginBottom: 15 }}>
-            <label style={{ color: "#fff", display: "block", marginBottom: 6, fontWeight: 600 }}>Mật khẩu</label>
+            <label
+              style={{
+                color: "#fff",
+                display: "block",
+                marginBottom: 6,
+                fontWeight: 600,
+              }}
+            >
+              Mật khẩu
+            </label>
             <input
               type="password"
               placeholder="Nhập mật khẩu"
@@ -110,29 +130,41 @@ function Login() {
                 background: "#23272b",
                 color: "#fff",
                 border: "1px solid #282a36",
-                borderRadius: 6
+                borderRadius: 6,
               }}
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}>
-            <label style={{ color: "#ccc", display: "flex", alignItems: "center", fontSize: 15 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}
+          >
+            <label
+              style={{
+                color: "#ccc",
+                display: "flex",
+                alignItems: "center",
+                fontSize: 15,
+              }}
+            >
               <input
                 type="checkbox"
                 checked={remember}
-                onChange={e => setRemember(e.target.checked)}
+                onChange={(e) => setRemember(e.target.checked)}
                 style={{ marginRight: 6, accentColor: "#2196f3" }}
               />
               Ghi nhớ đăng nhập
             </label>
-            <Link to="/quen-mat-khau" style={{ color: "#33aaff", fontSize: 15, textDecoration: "none" }}>
+            <Link
+              to="/quen-mat-khau"
+              style={{ color: "#33aaff", fontSize: 15, textDecoration: "none" }}
+            >
               Quên mật khẩu?
             </Link>
           </div>
@@ -178,7 +210,10 @@ function Login() {
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <span style={{ color: "#aaa", fontSize: 15 }}>
             Chưa có tài khoản?{" "}
-            <Link to="/dang-ky" style={{ color: "#2196f3", textDecoration: "underline" }}>
+            <Link
+              to="/dang-ky"
+              style={{ color: "#2196f3", textDecoration: "underline" }}
+            >
               Đăng ký ngay
             </Link>
           </span>
