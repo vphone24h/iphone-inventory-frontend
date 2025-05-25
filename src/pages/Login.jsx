@@ -35,9 +35,9 @@ function Login() {
         const decoded = jwt_decode(data.token);
 
         if (decoded.role === "admin") {
-          navigate("/admin-xet-duyet");  // Thay bằng route admin xét duyệt của bạn
+          navigate("/admin-xet-duyet");  // Điều hướng trang dành cho admin
         } else {
-          navigate("/nhap-hang"); // Route cho user thường hoặc trang chính
+          navigate("/nhap-hang"); // Điều hướng trang dành cho user thường
         }
       } else {
         alert(`❌ ${data.message}`);
@@ -68,7 +68,6 @@ function Login() {
           boxShadow: "0 8px 32px #0002"
         }}
       >
-        {/* Dòng tiêu đề mới */}
         <div style={{
           textAlign: "center",
           fontSize: 22,

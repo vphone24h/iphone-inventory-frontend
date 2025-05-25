@@ -4,8 +4,10 @@ function AdminUserApprove() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
 
   const token = localStorage.getItem("token");
+  const apiUrl = import.meta.env.VITE_API_URL || "";
 
   useEffect(() => {
     const fetchPendingUsers = async () => {
@@ -13,7 +15,7 @@ function AdminUserApprove() {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("/api/pending-users", {
+        const res = await fetch(`${apiUrl}/api/pending-users`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -24,7 +26,7 @@ function AdminUserApprove() {
         }
 
         const data = await res.json();
-        setUsers(data.users || data); // tùy backend trả data thế nào
+        setUsers(data.users || data); // điều chỉnh theo backend trả về
       } catch (err) {
         setError(err.message || "Lỗi không xác định");
       } finally {
@@ -33,11 +35,12 @@ function AdminUserApprove() {
     };
 
     fetchPendingUsers();
-  }, [token]);
+  }, [token, apiUrl]);
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`/api/approve-user/${id}`, {
+      setApprovingId(id);
+      const res = await fetch(`${apiUrl}/api/approve-user/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -52,6 +55,8 @@ function AdminUserApprove() {
       alert("Đã duyệt user!");
     } catch (err) {
       alert(err.message || "Lỗi không xác định khi duyệt user");
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -80,7 +85,9 @@ function AdminUserApprove() {
             <tr key={u._id}>
               <td>{u.email}</td>
               <td>
-                <button onClick={() => handleApprove(u._id)}>Duyệt</button>
+                <button onClick={() => handleApprove(u._id)} disabled={approvingId === u._id}>
+                  {approvingId === u._id ? "Đang duyệt..." : "Duyệt"}
+                </button>
               </td>
             </tr>
           ))}
