@@ -19,7 +19,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {  // Gọi api login user
+      const res = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -31,10 +31,8 @@ function Login() {
         alert("✅ Đăng nhập thành công");
         localStorage.setItem("token", data.token);
 
-        // Giải mã token nếu muốn lấy thông tin
         const decoded = jwt_decode.default(data.token);
 
-        // Chuyển thẳng về trang nhập hàng (user)
         navigate("/nhap-hang");
       } else {
         alert(`❌ ${data.message}`);
@@ -185,15 +183,10 @@ function Login() {
           </button>
         </form>
 
-        {/* Đã bỏ nút đăng nhập Admin */}
-
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <span style={{ color: "#aaa", fontSize: 15 }}>
             Chưa có tài khoản?{" "}
-            <Link
-              to="/dang-ky"
-              style={{ color: "#2196f3", textDecoration: "underline" }}
-            >
+            <Link to="/dang-ky" style={{ color: "#2196f3", textDecoration: "underline" }}>
               Đăng ký ngay
             </Link>
           </span>
