@@ -5,6 +5,7 @@ function DangKy() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState(""); // thêm state message hiển thị thông báo
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -25,7 +26,6 @@ function DangKy() {
         body: JSON.stringify({ email, password }),
       });
 
-      // Nếu không phải JSON, sẽ tránh lỗi "unexpected token <"
       let data = {};
       try {
         data = await res.json();
@@ -34,14 +34,14 @@ function DangKy() {
       }
 
       if (res.ok) {
-        alert("✅ Đăng ký thành công!");
-        navigate("/login");
+        // Thay vì alert và chuyển trang ngay, hiển thị thông báo chờ duyệt
+        setMessage("✅ Đăng ký thành công, vui lòng chờ admin phê duyệt.");
       } else {
-        alert(`❌ ${data.message || "Đăng ký thất bại"}`);
+        setMessage(`❌ ${data.message || "Đăng ký thất bại"}`);
       }
     } catch (err) {
       console.error("❌ Lỗi kết nối server:", err);
-      alert("❌ Lỗi khi kết nối tới server");
+      setMessage("❌ Lỗi khi kết nối tới server");
     }
   };
 
@@ -81,6 +81,12 @@ function DangKy() {
           Đăng ký
         </button>
       </form>
+
+      {message && (
+        <p className={`mt-4 text-sm ${message.startsWith('✅') ? 'text-green-600' : 'text-red-600'}`}>
+          {message}
+        </p>
+      )}
 
       <p className="mt-4 text-sm text-gray-600">
         🔐 Đã có tài khoản?{" "}

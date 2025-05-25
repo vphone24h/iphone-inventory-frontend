@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";   // <-- Bổ sung import AdminLogin
 import DangKy from "./pages/DangKy";
 import QuenMatKhau from "./pages/QuenMatKhau";
 import ResetMatKhau from "./pages/ResetMatKhau";
@@ -10,6 +11,8 @@ import BaoCao from "./BaoCao"; // giữ đúng nếu không nằm trong /pages
 import PrivateRoute from "./components/PrivateRoute";
 import CongNo from "./pages/CongNo";
 import AdminUserApprove from "./pages/AdminUserApprove"; // Đổi tên đúng với file và component
+import QuanLyUser from "./pages/QuanLyUser"; // Bổ sung import trang quản lý user
+import NotAuthorized from "./pages/NotAuthorized"; // Nếu chưa có, bạn tạo trang này
 
 function App() {
   return (
@@ -17,6 +20,7 @@ function App() {
       {/* Public routes */}
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/admin-login" element={<AdminLogin />} />  {/* <-- Thêm route đăng nhập admin */}
       <Route path="/dang-ky" element={<DangKy />} />
       <Route path="/quen-mat-khau" element={<QuenMatKhau />} />
       <Route path="/reset-mat-khau/:token" element={<ResetMatKhau />} />
@@ -72,6 +76,19 @@ function App() {
           </PrivateRoute>
         }
       />
+
+      {/* Route mới: Quản lý user chờ duyệt - chỉ admin được vào */}
+      <Route
+        path="/quanlyuser"
+        element={
+          <PrivateRoute requiredRole="admin">
+            <QuanLyUser />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Route trang không đủ quyền */}
+      <Route path="/not-authorized" element={<NotAuthorized />} />
     </Routes>
   );
 }

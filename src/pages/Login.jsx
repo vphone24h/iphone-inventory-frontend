@@ -155,6 +155,26 @@ function Login() {
             ĐĂNG NHẬP
           </button>
         </form>
+
+        {/* Nút chuyển sang đăng nhập admin */}
+        <div style={{ textAlign: "center", marginTop: 10 }}>
+          <button
+            onClick={() => navigate("/admin-login")}
+            style={{
+              backgroundColor: "#ff5722",
+              color: "#fff",
+              padding: "10px 20px",
+              borderRadius: 6,
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: 14,
+            }}
+          >
+            Đăng nhập Admin
+          </button>
+        </div>
+
         <div style={{ textAlign: "center", marginTop: 10 }}>
           <span style={{ color: "#aaa", fontSize: 15 }}>
             Chưa có tài khoản?{" "}
